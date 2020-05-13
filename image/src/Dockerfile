@@ -9,14 +9,15 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 
 # Create working directories
 RUN New-Item -Path 'C:\\temp' -ItemType 'Directory' -Force | Out-Null; `
-    New-Item -Path 'C:\\tools' -ItemType 'Directory' -Force | Out-Null;
+    New-Item -Path 'C:\\tools' -ItemType 'Directory' -Force | Out-Null;`
+    New-Item -Path 'C:\\tools\\bin' -ItemType 'Directory' -Force | Out-Null;
 
 # Install NuGet
 ADD https://dist.nuget.org/win-x86-commandline/v5.2.0/nuget.exe /temp/
 
 # Install Filebeat
 #RUN Invoke-WebRequest -Uri "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.4.1-windows-x86_64.zip" -OutFile C:\\temp\\filebeat.zip; `
-#    Expand-Archive -Path 'C:\\temp\\filebeat.zip' -DestinationPath 'C:\\tools\\bin' -Force; `
+#    Expand-Archive -Path 'C:\\temp\\filebeat.zip' -DestinationPath 'C:\\tools\\bin'; `
 #    Rename-Item -Path (Get-Item -Path 'C:\\tools\\bin\\filebeat*windows*').FullName -NewName "filebeat" -Force -ErrorAction SilentlyContinue; `
 #    Remove-Item -Path 'C:\\temp\\filebeat.zip' -Force;
 
