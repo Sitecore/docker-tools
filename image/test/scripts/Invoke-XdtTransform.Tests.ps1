@@ -9,7 +9,7 @@ Describe 'Invoke-XdtTransform.ps1' {
         if (!(Get-Package Microsoft.Web.Xdt -Destination "$PSScriptRoot\..\packages" -ErrorAction SilentlyContinue)) {
             Install-Package Microsoft.Web.Xdt -RequiredVersion 3.0.0 -ProviderName NuGet -Destination "$PSScriptRoot\..\packages" -Force -ForceBootstrap
         }
-        $xdtDllPath = ".\..\packages\Microsoft.Web.Xdt.3.0.0\lib\netstandard2.0\Microsoft.Web.XmlTransform.dll"
+        $xdtDllPath = "$PSScriptRoot\..\packages\Microsoft.Web.Xdt.3.0.0\lib\netstandard2.0\Microsoft.Web.XmlTransform.dll"
 
         $validConfig = Join-Path $TestDrive 'Web.config'
         Set-Content $validConfig -Value '<?xml version="1.0"?><configuration></configuration>'

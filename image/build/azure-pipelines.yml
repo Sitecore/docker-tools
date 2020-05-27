@@ -1,0 +1,91 @@
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+  paths:
+    include:
+    - 'image/*'
+    exclude:
+    - 'powershell/*'
+
+resources:
+- repo: self
+
+variables:
+  major: 10
+  minor: 0
+  build: $(Build.BuildID)
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+    stability: ''
+  ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
+    stability: '-unstable'
+  buildVer: $(major).$(minor).$(build)$(stability)
+
+pool: Default
+
+stages:
+- stage: Build
+
+  jobs:  
+  - job: Build
+    displayName: Build image
+    steps:
+
+    - task: DockerCompose@0
+      displayName: Build image
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerRegistryEndpoint: '$(RegistryServiceConnection)'
+        dockerComposeFile: '**/docker-compose.yml'
+        dockerComposeFileArgs: |
+          REGISTRY=$(Registry)/
+          VERSION=$(buildVer)
+        action: 'Build services'
+        arguments: '--force-rm'
+        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+
+- stage: Test
+  dependsOn: Build
+
+  jobs:
+  - job: Pester
+    displayName: Run Pester tests
+    steps:
+    
+    - task: Pester@9
+      inputs:
+        scriptFolder: "$(Build.SourcesDirectory)/image/test/*"
+        resultsFile: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
+        usePSCore: False
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: "NUnit"
+        testResultsFiles: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
+        failTaskOnFailedTests: true
+    
+- stage: Push
+  dependsOn: Test
+
+  jobs:
+  - job: Push
+    displayName: Push image
+    steps:
+
+    - task: Docker@2
+      displayName: Login to registry
+      inputs:
+        containerRegistry: '$(RegistryServiceConnection)'
+        command: 'login'
+    
+    - task: DockerCompose@0
+      displayName: Push image
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerRegistryEndpoint: '$(RegistryServiceConnection)'
+        dockerComposeFile: '**/docker-compose.yml'
+        dockerComposeFileArgs: |
+          REGISTRY=$(Registry)/
+          VERSION=$(buildVer)
+        action: 'Push services'
+        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
