@@ -39,7 +39,7 @@ stages:
         dockerRegistryEndpoint: '$(RegistryServiceConnection)'
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(Registry)/
+          REGISTRY=$(Registry)/$(RegistryProject)/
           VERSION=$(buildVer)
         action: 'Build services'
         arguments: '--force-rm'
@@ -85,7 +85,7 @@ stages:
         dockerRegistryEndpoint: '$(RegistryServiceConnection)'
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(Registry)/
+          REGISTRY=$(Registry)/$(RegistryProject)/
           VERSION=$(buildVer)
         action: 'Push services'
         currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
