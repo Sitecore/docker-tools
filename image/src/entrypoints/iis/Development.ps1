@@ -4,56 +4,51 @@ param(
     [hashtable]$WatchDirectoryParameters
 )
 
-# setup
-$ErrorActionPreference = "STOP"
-
+# Setup
+$ErrorActionPreference = "Stop"
+$InformationPreference = "Continue"
 $timeFormat = "HH:mm:ss:fff"
 
-# print start message
-Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT, starting..."
+# Print start message
+Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: starting..."
 
-# check to see if we should start the Watch-Directory.ps1 script
+# Check to see if we should start the Watch-Directory.ps1 script
 $watchDirectoryJobName = "Watch-Directory.ps1"
 $useWatchDirectory = $null -ne $WatchDirectoryParameters -bor (Test-Path -Path "C:\deploy" -PathType "Container") -eq $true
 
 if ($useWatchDirectory)
 {
-    # setup default parameters if none is supplied
+    # Setup default parameters if none is supplied
     if ($null -eq $WatchDirectoryParameters)
     {
         $WatchDirectoryParameters = @{ Path = "C:\deploy"; Destination = "C:\inetpub\wwwroot"; }
     }
 
-    Write-Host "$(Get-Date -Format $timeFormat): Job '$watchDirectoryJobName' starting..."
+    Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: '$watchDirectoryJobName' validating..."
 
-    # start Watch-Directory.ps1 in background
-    $job = Start-Job -Name $watchDirectoryJobName -ArgumentList $WatchDirectoryParameters -ScriptBlock {
+    # First a trial-run to catch any parameter validation / setup errors
+    $WatchDirectoryParameters["WhatIf"] = $true
+    & "C:\tools\scripts\Watch-Directory.ps1" @WatchDirectoryParameters
+    $WatchDirectoryParameters["WhatIf"] = $false
+    
+    Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: '$watchDirectoryJobName' starting..."
+
+    # Start Watch-Directory.ps1 in background
+    Start-Job -Name $watchDirectoryJobName -ArgumentList $WatchDirectoryParameters -ScriptBlock {
         param([hashtable]$params)
 
         & "C:\tools\scripts\Watch-Directory.ps1" @params
 
-    }
+    } | Out-Null
 
-    # wait to see if job failed (it will if for example parsing in invalid parameters)...
-    Start-Sleep -Seconds 1
-
-    # writes output stream
-    $job | Receive-Job
-
-    if ($job.State -ne "Running")
-    {
-        # exit
-        exit 1
-    }
-
-    Write-Host "$(Get-Date -Format $timeFormat): Job '$watchDirectoryJobName' started."
+    Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: '$watchDirectoryJobName' started."
 }
 else
 {
-    Write-Host "$(Get-Date -Format $timeFormat): Skipping start of '$watchDirectoryJobName', to enable you should mount a directory into 'C:\deploy'."
+    Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: Skipping start of '$watchDirectoryJobName'. To enable you should mount a directory into 'C:\deploy'."
 }
 
-# print ready message
-Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT, ready!"
+# Print ready message
+Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: ready!"
 
 & "C:\LogMonitor\LogMonitor.exe" "C:\ServiceMonitor.exe" "w3svc"
