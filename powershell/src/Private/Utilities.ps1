@@ -23,34 +23,3 @@ function SetEnvironmentVariable
 
     [Environment]::SetEnvironmentVariable($Variable, $Value, $Target)
 }
-
-<#
-.SYNOPSIS
-    Generate a random string to use as a key or password.
-.PARAMETER Length
-    The desired length of the string, no more than 128.
-.PARAMETER AlphanumericCharactersOnly
-    Limit to use of alphanumeric characters only.
-.OUTPUTS
-    System.String. The random string.
-#>
-function GenerateRandomKey
-{
-    Param (
-        [Parameter(Mandatory = $true, Position = 0)]
-        [ValidateScript({ $_ -le 128 })]
-        [int]
-        $Length,
-
-        [switch]
-        $AlphanumericCharactersOnly
-    )
-
-    Add-Type -AssemblyName 'System.Web'
-
-    $key = [Web.Security.Membership]::GeneratePassword($Length, 0)
-    if ($AlphanumericCharactersOnly) {
-        $key = $key -replace "[^a-zA-Z0-9]", "0"
-    }
-    return $key
-}
