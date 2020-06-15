@@ -17,7 +17,7 @@ Set-StrictMode -Version Latest
 .EXAMPLE
     PS C:\> Set-EnvironmentFileVariable -Variable VAR1 -Value "value one" -Path .\src\.env
 .INPUTS
-    None.
+    System.String. You can pipe in the Value parameter.
 .OUTPUTS
     None.
 #>
@@ -29,7 +29,7 @@ function Set-EnvironmentFileVariable
         [string]
         $Variable,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNull()]
         [AllowEmptyString()]
         [string]

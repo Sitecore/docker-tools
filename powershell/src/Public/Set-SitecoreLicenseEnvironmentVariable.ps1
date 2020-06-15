@@ -19,7 +19,7 @@ Set-StrictMode -Version Latest
 .EXAMPLE
     PS C:\> [System.IO.File]::OpenRead('C:\License\license.xml') | Set-SitecoreLicenseEnvironmentVariable
 .INPUTS
-    System.IO.FileStream
+    System.IO.FileStream. You can pipe in the LicenseStream parameter.
 .OUTPUTS
     None.
 #>
