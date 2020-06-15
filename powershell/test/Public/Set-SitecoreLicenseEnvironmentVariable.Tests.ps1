@@ -18,37 +18,37 @@
 
         It 'requires $LicensePath or $LicenseStream' {
             $result = Test-ParamIsMandatory -Command Set-SitecoreLicenseEnvironmentVariable -Parameter LicensePath -SetName 'FromPath'
-            $result | Should Be $true
+            $result | Should -Be $true
             $result = Test-ParamIsMandatory -Command Set-SitecoreLicenseEnvironmentVariable -Parameter LicenseStream -SetName 'FromStream'
-            $result | Should Be $true
+            $result | Should -Be $true
         }
 
         It 'restricts $Target to limited set' {
             $result = Test-ParamValidateSet -Command Set-SitecoreLicenseEnvironmentVariable -Parameter Target -Values 'Machine','User'
-            $result | Should Be $true
+            $result | Should -Be $true
         }
 
         It 'throws if $LicensePath is $null' {
-            { Set-SitecoreLicenseEnvironmentVariable -LicensePath $null } | Should Throw
+            { Set-SitecoreLicenseEnvironmentVariable -LicensePath $null } | Should -Throw
         }
 
         It 'throws if $LicensePath is empty' {
-            { Set-SitecoreLicenseEnvironmentVariable -LicensePath "" } | Should Throw
+            { Set-SitecoreLicenseEnvironmentVariable -LicensePath "" } | Should -Throw
         }
 
         It 'throws if $LicensePath is invalid' {
-            { Set-SitecoreLicenseEnvironmentVariable -LicensePath "NO:\\NO" } | Should Throw
+            { Set-SitecoreLicenseEnvironmentVariable -LicensePath "NO:\\NO" } | Should -Throw
         }
 
         It 'throws if $LicensePath is a folder' {
-            { Set-SitecoreLicenseEnvironmentVariable -LicensePath $TestDrive } | Should Throw
+            { Set-SitecoreLicenseEnvironmentVariable -LicensePath $TestDrive } | Should -Throw
         }
 
         Context 'when license is invalid' {
             Mock ConvertTo-CompressedBase64String { return 'invalid' }
 
             It 'throws if compressed string is less than 100 characters' {
-                { Set-SitecoreLicenseEnvironmentVariable -LicensePath $licensePath } | Should Throw
+                { Set-SitecoreLicenseEnvironmentVariable -LicensePath $licensePath } | Should -Throw
             }
         }
 
@@ -74,7 +74,7 @@
 
             It 'persists environment variable for current session' {
                 Set-SitecoreLicenseEnvironmentVariable -LicensePath $licensePath
-                $env:SITECORE_LICENSE | Should Be $licenseString
+                $env:SITECORE_LICENSE | Should -Be $licenseString
             }
 
             It 'uses Machine as default $Target' {

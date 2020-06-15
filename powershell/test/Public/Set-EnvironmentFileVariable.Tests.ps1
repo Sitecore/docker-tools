@@ -5,30 +5,30 @@
 
         It 'requires $Variable' {
             $result = Test-ParamIsMandatory -Command Set-EnvironmentFileVariable -Parameter Variable
-            $result | Should Be $true
+            $result | Should -Be $true
         }
 
         It 'requires $Value' {
             $result = Test-ParamIsMandatory -Command Set-EnvironmentFileVariable -Parameter Value
-            $result | Should Be $true
+            $result | Should -Be $true
         }
 
         It 'throws if $Path is invalid' {
-            { Set-EnvironmentFileVariable -Variable "foo" -Value "bar" -Path $TestDrive } | Should Throw
+            { Set-EnvironmentFileVariable -Variable "foo" -Value "bar" -Path $TestDrive } | Should -Throw
         }
 
         It 'throws if $Path is not a .env file' {
             $textFile = Join-Path $TestDrive 'test.txt'
             Set-Content $textFile -Value "Lorem ipsum dolor sit amet."
 
-            { Set-EnvironmentFileVariable -Variable "foo" -Value "bar" -Path $textFile } | Should Throw
+            { Set-EnvironmentFileVariable -Variable "foo" -Value "bar" -Path $textFile } | Should -Throw
         }
 
         It 'throws if $Variable is $null or empty' {
             $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value ''
-            { Set-EnvironmentFileVariable -Variable $null -Value "bar" -Path $envFile } | Should Throw
-            { Set-EnvironmentFileVariable -Variable "" -Value "bar" -Path $envFile } | Should Throw
+            { Set-EnvironmentFileVariable -Variable $null -Value "bar" -Path $envFile } | Should -Throw
+            { Set-EnvironmentFileVariable -Variable "" -Value "bar" -Path $envFile } | Should -Throw
         }
 
         It 'adds variable to empty file' {

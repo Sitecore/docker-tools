@@ -9,18 +9,18 @@ if (!(Get-Module PSScriptAnalyzer -ErrorAction SilentlyContinue)) {
 
 Describe 'Module Tests' {
     It 'imports successfully' {
-        { Import-Module -Name $ModuleScriptPath -ErrorAction Stop } | Should Not Throw
+        { Import-Module -Name $ModuleScriptPath -ErrorAction Stop } | Should -Not -Throw
     }
 
     It 'passes default PSScriptAnalyzer rules' {
-        Invoke-ScriptAnalyzer -Path $ModuleScriptPath | Should BeNullOrEmpty
+        Invoke-ScriptAnalyzer -Path $ModuleScriptPath | Should -BeNullOrEmpty
     }
 }
 
 Describe 'Module Manifest Tests' {
     It 'passes Test-ModuleManifest' {
         Write-Host $ModuleManifestPath
-        Test-ModuleManifest -Path $ModuleManifestPath | Should Not BeNullOrEmpty
-        $? | Should Be $true
+        Test-ModuleManifest -Path $ModuleManifestPath | Should -Not -BeNullOrEmpty
+        $? | Should -Be $true
     }
 }

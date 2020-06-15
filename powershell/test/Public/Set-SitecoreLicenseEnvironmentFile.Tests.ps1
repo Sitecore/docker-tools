@@ -21,43 +21,43 @@
 
         It 'requires $LicensePath or $LicenseStream' {
             $result = Test-ParamIsMandatory -Command Set-SitecoreLicenseEnvironmentFile -Parameter LicensePath -SetName 'FromPath'
-            $result | Should Be $true
+            $result | Should -Be $true
             $result = Test-ParamIsMandatory -Command Set-SitecoreLicenseEnvironmentFile -Parameter LicenseStream -SetName 'FromStream'
-            $result | Should Be $true
+            $result | Should -Be $true
         }
 
         It 'throws if $LicensePath is $null' {
-            { Set-SitecoreLicenseEnvironmentFile -LicensePath $null } | Should Throw
+            { Set-SitecoreLicenseEnvironmentFile -LicensePath $null } | Should -Throw
         }
 
         It 'throws if $LicensePath is empty' {
-            { Set-SitecoreLicenseEnvironmentFile -LicensePath "" } | Should Throw
+            { Set-SitecoreLicenseEnvironmentFile -LicensePath "" } | Should -Throw
         }
 
         It 'throws if $LicensePath is invalid' {
-            { Set-SitecoreLicenseEnvironmentFile -LicensePath "NO:\\NO" } | Should Throw
+            { Set-SitecoreLicenseEnvironmentFile -LicensePath "NO:\\NO" } | Should -Throw
         }
 
         It 'throws if $LicensePath is a folder' {
-            { Set-SitecoreLicenseEnvironmentFile -LicensePath $TestDrive } | Should Throw
+            { Set-SitecoreLicenseEnvironmentFile -LicensePath $TestDrive } | Should -Throw
         }
 
         It 'throws if $EnvironmentFilePath is invalid' {
-            { Set-SitecoreLicenseEnvironmentFile -EnvironmentFilePath $TestDrive } | Should Throw
+            { Set-SitecoreLicenseEnvironmentFile -EnvironmentFilePath $TestDrive } | Should -Throw
         }
 
         It 'throws if $EnvironmentFilePath is not a .env file' {
             $textFile = Join-Path $TestDrive 'test.txt'
             Set-Content $textFile -Value "Lorem ipsum dolor sit amet."
 
-            { Set-SitecoreLicenseEnvironmentFile -EnvironmentFilePath $textFile } | Should Throw
+            { Set-SitecoreLicenseEnvironmentFile -EnvironmentFilePath $textFile } | Should -Throw
         }
 
         Context 'when license is invalid' {
             Mock ConvertTo-CompressedBase64String { return 'invalid' }
 
             It 'throws if compressed string is less than 100 characters' {
-                { Set-SitecoreLicenseEnvironmentFile -LicensePath $licensePath } | Should Throw
+                { Set-SitecoreLicenseEnvironmentFile -LicensePath $licensePath } | Should -Throw
             }
         }
 
@@ -83,7 +83,7 @@
 
             It 'persists environment variable for current session' {
                 Set-SitecoreLicenseEnvironmentFile -LicensePath $licensePath -EnvironmentFilePath $envFilePath
-                $env:SITECORE_LICENSE | Should Be $licenseString
+                $env:SITECORE_LICENSE | Should -Be $licenseString
             }
 
             It 'uses $PSScriptRoot\.env as default $EnvironmentFilePath' {
