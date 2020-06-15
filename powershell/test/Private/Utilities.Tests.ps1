@@ -26,4 +26,37 @@
             $result | Should -Be $true
         }
     }
+
+    Describe 'GenerateRandomKey' {
+
+        It 'requires $Length' {
+            $result = Test-ParamIsMandatory -Command GenerateRandomKey -Parameter Length
+            $result | Should -Be $true
+        }
+
+        It 'throws if $Length is greater than 128' {
+            { GenerateRandomKey -Length 129 } | Should -Throw
+        }
+
+        It 'generates key' {
+            $key = GenerateRandomKey 10
+            $key | Should -Not -BeNullOrEmpty
+            $key.length | Should -Be 10
+        }
+
+        It 'does not include whitespace in key' {
+            $key = GenerateRandomKey 100
+            $key | Should -Not -Match " "
+        }
+
+        It 'includes non-alphanumeric characters in key by default' {
+            $key = GenerateRandomKey 100
+            $key | Should -Match "[^a-zA-Z0-9]"
+        }
+
+        It 'excludes non-alphanumeric characters in key when requested' {
+            $key = GenerateRandomKey 100 -AlphanumericCharactersOnly
+            $key | Should -Not -Match "[^a-zA-Z0-9]"
+        }
+    }
 }
