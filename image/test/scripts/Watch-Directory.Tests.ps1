@@ -15,24 +15,24 @@ Describe 'Watch-Directory.ps1' {
 
     It 'requires $Path' {
         $result = Test-ParamIsMandatory -Command $script -Parameter Path
-        $result | Should Be $true
+        $result | Should -Be $true
     }
 
     It 'requires $Destination' {
         $result = Test-ParamIsMandatory -Command $script -Parameter Destination
-        $result | Should Be $true
+        $result | Should -Be $true
     }
-    
+
     It 'throws if invalid $Path' {
-        {& $script -Path 'C:\DoesNotExist' -Destination $TestDrive} | Should Throw
-        {& $script -Path $dummyFile -Destination $TestDrive} | Should Throw
-        {& $script -Path $null -Destination $TestDrive} | Should Throw
+        {& $script -Path 'C:\DoesNotExist' -Destination $TestDrive} | Should -Throw
+        {& $script -Path $dummyFile -Destination $TestDrive} | Should -Throw
+        {& $script -Path $null -Destination $TestDrive} | Should -Throw
     }
 
     It 'throws if invalid $Destination' {
-        {& $script -Path $TestDrive -Destination 'C:\DoesNotExist'} | Should Throw
-        {& $script -Path $TestDrive -Destination $dummyFile} | Should Throw
-        {& $script -Path $TestDrive -Destination $null} | Should Throw
+        {& $script -Path $TestDrive -Destination 'C:\DoesNotExist'} | Should -Throw
+        {& $script -Path $TestDrive -Destination $dummyFile} | Should -Throw
+        {& $script -Path $TestDrive -Destination $null} | Should -Throw
     }
 
     It 'copies existing files' {
@@ -48,7 +48,7 @@ Describe 'Watch-Directory.ps1' {
     It 'copies new files' {
         $src = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
         $dst = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
-        
+
         $job = Start-Job -ScriptBlock { Start-Sleep -Milliseconds 500; New-Item -Path "$($args[0])\file.txt" } -ArgumentList $src
         & $script -Path $src -Destination $dst -Timeout 1000 -Sleep 100
         $job | Wait-Job | Remove-Job
@@ -65,10 +65,10 @@ Describe 'Watch-Directory.ps1' {
         $job = Start-Job -ScriptBlock { Start-Sleep -Milliseconds 500; Remove-Item -Path "$($args[0])\file.txt" } -ArgumentList $src
         & $script -Path $src -Destination $dst -Timeout 1000 -Sleep 100
         $job | Wait-Job | Remove-Job
-        
+
         "$($dst)\file.txt" | Should -Not -Exist
     }
-    
+
     It 'ignores excluded files on copy' {
         $src = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
         $dst = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
@@ -76,7 +76,7 @@ Describe 'Watch-Directory.ps1' {
         New-Item -Path "$($src)\web.config" -ItemType 'File'
 
         & $script -Path $src -Destination $dst -Timeout 100 -DefaultExcludedFiles @("*.disabled") -ExcludeFiles @("web.config")
-        
+
         "$($dst)\file.disabled" | Should -Not -Exist
         "$($dst)\web.config" | Should -Not -Exist
     }
@@ -90,11 +90,11 @@ Describe 'Watch-Directory.ps1' {
         New-Item -Path "$($src)\exclude\file.txt" -ItemType 'File'
 
         & $script -Path $src -Destination $dst -Timeout 100 -DefaultExcludedDirectories @("obj") -ExcludeDirectories @("exclude")
-        
+
         "$($dst)\obj\file.txt" | Should -Not -Exist
         "$($dst)\exclude\file.txt" | Should -Not -Exist
     }
-    
+
     It 'ignores excluded files on delete' {
         $src = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
         $dst = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
@@ -104,7 +104,7 @@ Describe 'Watch-Directory.ps1' {
         $job = Start-Job -ScriptBlock { Start-Sleep -Milliseconds 500; Remove-Item -Path "$($args[0])\web.config" } -ArgumentList $src
         & $script -Path $src -Destination $dst -Timeout 1000 -Sleep 100 -ExcludeFiles @("web.config")
         $job | Wait-Job | Remove-Job
-        
+
         "$($src)\web.config" | Should -Not -Exist
         "$($dst)\web.config" | Should -Exist
     }
