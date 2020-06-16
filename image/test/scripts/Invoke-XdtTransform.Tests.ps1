@@ -19,24 +19,24 @@ Describe 'Invoke-XdtTransform.ps1' {
 
     It 'requires $Path' {
         $result = Test-ParamIsMandatory -Command $script -Parameter Path
-        $result | Should Be $true
+        $result | Should -Be $true
     }
 
     It 'requires $XdtPath' {
         $result = Test-ParamIsMandatory -Command $script -Parameter XdtPath
-        $result | Should Be $true
+        $result | Should -Be $true
     }
-    
+
     It 'throws if $Path is a folder and $XdtPath is a file' {
-        {& $script -Path $TestDrive -XdtPath $validTransform -XdtDllPath $xdtDllPath} | Should Throw
+        {& $script -Path $TestDrive -XdtPath $validTransform -XdtDllPath $xdtDllPath} | Should -Throw
     }
 
     It 'throws if $Path is a file and $XdtPath is a folder' {
-        {& $script -Path $validConfig -XdtPath $TestDrive -XdtDllPath $xdtDllPath} | Should Throw
+        {& $script -Path $validConfig -XdtPath $TestDrive -XdtDllPath $xdtDllPath} | Should -Throw
     }
 
     It 'throws if invalid $XdtDllPath' {
-        {& $script -Path $validConfig -XdtPath $validTransform -XdtDllPath $null} | Should Throw
+        {& $script -Path $validConfig -XdtPath $validTransform -XdtDllPath $null} | Should -Throw
     }
 
     Context 'when passing files' {
@@ -93,7 +93,7 @@ Describe 'Invoke-XdtTransform.ps1' {
 </configuration>
 '@
 
-            {& $script -Path $config -XdtPath $transform -XdtDllPath $xdtDllPath} | Should Throw
+            {& $script -Path $config -XdtPath $transform -XdtDllPath $xdtDllPath} | Should -Throw
         }
     }
 
