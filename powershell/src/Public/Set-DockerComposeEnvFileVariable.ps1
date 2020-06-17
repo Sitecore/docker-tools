@@ -13,18 +13,20 @@ Set-StrictMode -Version Latest
 .PARAMETER Path
     Specifies the Docker environment (.env) file path. Assumes .env file is in the current directory by default.
 .EXAMPLE
-    PS C:\> Set-EnvironmentFileVariable -Variable VAR1 -Value "value one"
+    PS C:\> Set-DockerComposeEnvFileVariable -Variable VAR1 -Value "value one"
 .EXAMPLE
-    PS C:\> Set-EnvironmentFileVariable -Variable VAR1 -Value "value one" -Path .\src\.env
+    PS C:\> "value one" | Set-DockerComposeEnvFileVariable "VAR1"
+.EXAMPLE
+    PS C:\> Set-DockerComposeEnvFileVariable -Variable VAR1 -Value "value one" -Path .\src\.env
 .INPUTS
     System.String. You can pipe in the Value parameter.
 .OUTPUTS
     None.
 #>
-function Set-EnvironmentFileVariable
+function Set-DockerComposeEnvFileVariable
 {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [ValidateNotNullOrEmpty()]
         [string]
         $Variable,
@@ -37,7 +39,7 @@ function Set-EnvironmentFileVariable
 
         [ValidateScript({ $_ -match '\.env$' })]
         [string]
-        $Path = (Join-Path $MyInvocation.PSScriptRoot ".env")
+        $Path = ".\.env"
     )
 
     if (!(Test-Path $Path)) {
