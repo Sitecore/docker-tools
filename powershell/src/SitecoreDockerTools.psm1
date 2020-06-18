@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 #Requires -RunAsAdministrator
 
 # Get Functions
-$private = @() # @(Get-ChildItem -Path (Join-Path $PSScriptRoot Private) -Include *.ps1 -File -Recurse)
+$private = @(Get-ChildItem -Path (Join-Path $PSScriptRoot Private) -Include *.ps1 -File -Recurse)
 $public = @(Get-ChildItem -Path (Join-Path $PSScriptRoot Public) -Include *.ps1 -File -Recurse)
 
 # Dot source to scope

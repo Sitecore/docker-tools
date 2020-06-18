@@ -4,7 +4,7 @@ $ModuleScriptPath = "$PSScriptRoot\..\..\src\$ModuleScriptName"
 $ModuleManifestPath = "$PSScriptRoot\..\..\src\$ModuleManifestName"
 
 if (!(Get-Module PSScriptAnalyzer -ErrorAction SilentlyContinue)) {
-    Install-Module -Name PSScriptAnalyzer -Force
+    Install-Module -Name PSScriptAnalyzer -Repository PSGallery -Force
 }
 
 Describe 'Module Tests' {
