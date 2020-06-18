@@ -47,7 +47,8 @@ function Set-DockerComposeEnvFileVariable
     }
 
     $found = $false
-    $lines = @(Get-Content $Path | ForEach-Object {
+
+    $lines = @(Get-Content $Path -Encoding UTF8 | ForEach-Object {
         if ($_ -imatch "^$Variable=.*") {
             $_ -ireplace "^$Variable=.*", "$Variable=$Value"
             $found = $true
@@ -61,5 +62,5 @@ function Set-DockerComposeEnvFileVariable
         $lines += "$Variable=$Value"
     }
 
-    $lines | Set-Content $Path
+    WriteLines -File (Resolve-Path $Path) -Content $lines -Encoding ([System.Text.Encoding]::UTF8)
 }

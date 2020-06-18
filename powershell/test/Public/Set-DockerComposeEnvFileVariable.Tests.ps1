@@ -3,6 +3,9 @@
 
     Describe 'Set-DockerComposeEnvFileVariable' {
 
+        $envFile = Join-Path $TestDrive '.env'
+        Set-Content $envFile -Value ''
+
         It 'requires $Variable' {
             $result = Test-ParamIsMandatory -Command Set-DockerComposeEnvFileVariable -Parameter Variable
             $result | Should -Be $true
@@ -25,28 +28,23 @@
         }
 
         It 'throws if $Variable is $null or empty' {
-            $envFile = 'TestDrive:\.env'
-            Set-Content $envFile -Value ''
             { Set-DockerComposeEnvFileVariable -Variable $null -Value "bar" -Path $envFile } | Should -Throw
             { Set-DockerComposeEnvFileVariable -Variable "" -Value "bar" -Path $envFile } | Should -Throw
         }
 
         It 'adds variable to empty file' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value ''
             Set-DockerComposeEnvFileVariable -Path $envFile -Variable 'VAR' -Value 'VAL'
             $envFile | Should -FileContentMatchExactly '^VAR=VAL$'
         }
 
         It 'adds variable on new line to end of file' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value 'VAR1=VAL1'
             Set-DockerComposeEnvFileVariable -Path $envFile -Variable 'VAR2' -Value 'VAL2'
             $envFile | Should -FileContentMatchMultiline '^VAR1=VAL1\r\nVAR2=VAL2\r\n$'
         }
 
         It 'sets existing variable with value to new value' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value @(
                 'VAR1=VAL1',
                 'VAR2=VAL2',
@@ -57,7 +55,6 @@
         }
 
         It 'sets existing variable with value to empty' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value @(
                 'VAR1=VAL1',
                 'VAR2=VAL2',
@@ -68,7 +65,6 @@
         }
 
         It 'sets existing variable empty to value' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value @(
                 'VAR1=',
                 'VAR2=VAL2',
@@ -79,7 +75,6 @@
         }
 
         It 'sets existing variable case insensitively' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value @(
                 'VAR1=VAL1',
                 'VAR2=VAL2',
@@ -92,7 +87,6 @@
         }
 
         It 'preserves comments' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value @(
                 '#VAR1=VAL1',
                 'VAR2=VAL2',
@@ -104,7 +98,6 @@
         }
 
         It 'adds variable when existing is commented' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value @(
                 '#VAR1=VAL1',
                 'VAR2=VAL2',
@@ -116,7 +109,6 @@
         }
 
         It 'preserves blank lines' {
-            $envFile = 'TestDrive:\.env'
             Set-Content $envFile -Value @(
                 'VAR1=VAL1',
                 '',
@@ -128,7 +120,6 @@
         }
 
         It 'uses .\.env as default $Path' {
-            $envFile = Join-Path $TestDrive '.env'
             Set-Content $envFile -Value "foo=bar"
 
             Push-Location $TestDrive
@@ -136,6 +127,29 @@
             Pop-Location
 
             $envFile | Should -FileContentMatchExactly '^foo=baz$'
+        }
+
+        Context 'Encoding' {
+            Mock WriteLines
+            Mock Get-Content
+
+            It 'reads as UTF8' {
+                Set-DockerComposeEnvFileVariable -Path $envFile -Variable 'VAR1' -Value 'one'
+
+                Assert-MockCalled Get-Content -Times 1 -Exactly -ParameterFilter {
+                    $Path -eq $envFile -and `
+                    $Encoding -eq 'UTF8'
+                } -Scope It
+            }
+
+            It 'writes as UTF8' {
+                Set-DockerComposeEnvFileVariable -Path $envFile -Variable 'VAR1' -Value 'one'
+
+                Assert-MockCalled WriteLines -Times 1 -Exactly -ParameterFilter {
+                    $File -eq $envFile -and `
+                    $Encoding -eq [System.Text.Encoding]::UTF8
+                } -Scope It
+            }
         }
     }
 }

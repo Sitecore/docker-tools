@@ -20,7 +20,7 @@ function WriteLines
     )
 
     $enc = $Encoding
-    $crlf = $enc.GetBytes("`n")
+    $crlf = $enc.GetBytes([Environment]::NewLine)
     $tries = 0
     $fileLock = $false
 

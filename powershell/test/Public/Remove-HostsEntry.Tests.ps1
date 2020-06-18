@@ -79,7 +79,7 @@
             }
         }
 
-        Context 'Removing when the hosts file is empty' {
+        Context 'When the hosts file is empty' {
             Mock Get-Content {
                 return $null
             } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
@@ -95,7 +95,7 @@
             }
         }
 
-        Context 'Removing when the hosts file contains only comments' {
+        Context 'When the hosts file contains only comments' {
             Mock Get-Content {
                 return @("# Hosts file comment")
             } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
@@ -111,7 +111,7 @@
             }
         }
 
-        Context 'Removing when there are no matching host headers in the host file' {
+        Context 'When there are no matching host headers in the host file' {
             Mock Get-Content {
                 return @("10.10.10.10`thostName1", "20.20.20.20`thostName2", "30.30.30.30`thostName3")
             } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
@@ -127,7 +127,7 @@
             }
         }
 
-        Context 'Removing when there is single host header in the hosts file' {
+        Context 'When there is single host header in the hosts file' {
             Mock Get-Content {
                 return @("10.10.10.10`thostName1")
             } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
@@ -146,7 +146,7 @@
             }
         }
 
-        Context 'Removing when there are single host header and comment in the hosts file' {
+        Context 'When there are single host header and comment in the hosts file' {
             Mock Get-Content {
                 return @("# Hosts file comment", "10.10.10.10`thostName1")
             } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
@@ -164,7 +164,7 @@
             }
         }
 
-        Context 'Removing there are multiple host headers in the hosts file' {
+        Context 'When there are multiple host headers in the hosts file' {
             Mock Get-Content {
                 return @("10.10.10.10`thostName1", "20.20.20.20`thostName2", "30.30.30.30`thostName3")
             } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
