@@ -46,6 +46,9 @@ function Set-DockerComposeEnvFileVariable
         throw "The environment file $Path does not exist"
     }
 
+    # Escape any '$' to prevent being used as a regex substitution
+    $Value = $Value.Replace('$', '$$')
+
     $found = $false
 
     $lines = @(Get-Content $Path -Encoding UTF8 | ForEach-Object {

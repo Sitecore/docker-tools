@@ -86,6 +86,12 @@
             $envFile | Should -Not -FileContentMatchExactly '^VAR1=one$'
         }
 
+        It 'sets existing variable to value with RegEx substitution characters' {
+            Set-Content $envFile -Value 'VAR=VAL'
+            Set-DockerComposeEnvFileVariable -Path $envFile -Variable 'VAR' -Value 'a$&b$$c'
+            $envFile | Should -FileContentMatch ([regex]::Escape('VAR=a$&b$$c'))
+        }
+
         It 'preserves comments' {
             Set-Content $envFile -Value @(
                 '#VAR1=VAL1',
