@@ -1,25 +1,55 @@
 Set-StrictMode -Version Latest
 
-<#
-.SYNOPSIS
-    Simple wrapper for .NET Environment.SetEnvironmentVariable to allow mocking / unit testing
-#>
-function SetEnvironmentVariable
+function WriteLines
 {
     Param (
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ Test-Path $_ -IsValid })]
+        [ValidateScript({ [System.IO.Path]::IsPathRooted($_) })]
         [string]
-        $Variable,
+        $File,
 
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Value,
+        [string[]]
+        $Content,
 
-        [ValidateSet("Process", "Machine", "User")]
-        [string]
-        $Target = "Process"
+        [System.Text.Encoding]
+        $Encoding = [System.Text.Encoding]::UTF8,
+
+        [int]
+        $Retries = 10
     )
 
-    [Environment]::SetEnvironmentVariable($Variable, $Value, $Target)
+    $enc = $Encoding
+    $crlf = $enc.GetBytes([Environment]::NewLine)
+    $tries = 0
+    $fileLock = $false
+
+    if (!(Test-Path -Path $File)) {
+        New-Item -Path $File
+    }
+
+    do {
+        try {
+            $fileLock = [System.IO.File]::Open($File, 'Open', 'ReadWrite', 'None')
+        }
+        catch {
+            Write-Warning -Message "Failed to get lock on file. $File"
+            $tries++
+            Start-Sleep -Milliseconds 100
+        }
+    } until ($fileLock -or ($tries -eq $Retries))
+
+    if ($tries -eq $Retries) {
+        throw "Unable to get lock on file $File after $Retries attempt(s)."
+    }
+
+    $fileLock.SetLength(0)
+
+    foreach ($line in $Content) {
+        $newLine = $enc.GetBytes($line)
+        $fileLock.Write($newLine, 0, $newLine.Length)
+        $fileLock.Write($crlf, 0, $crlf.Length)
+    }
+
+    $fileLock.Close()
 }

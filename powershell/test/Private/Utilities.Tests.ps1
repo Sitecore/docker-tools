@@ -1,29 +1,43 @@
 . $PSScriptRoot\..\TestRunner.ps1 {
     . $PSScriptRoot\..\TestUtils.ps1
 
-    Describe 'SetEnvironmentVariable' {
+    Describe 'WriteLines' {
 
-        It 'requires $Variable' {
-            $result = Test-ParamIsMandatory -Command SetEnvironmentVariable -Parameter Variable
-            $result | Should Be $true
+        BeforeEach {
+            Push-Location $TestDrive
         }
 
-        It 'requires $Value' {
-            $result = Test-ParamIsMandatory -Command SetEnvironmentVariable -Parameter Value
-            $result | Should Be $true
+        AfterEach {
+            Pop-Location
         }
 
-        It 'throws if $Variable is $null' {
-            { SetEnvironmentVariable -Variable $null } | Should Throw
+        It 'throws on invalid path' {
+            { WriteLines -File "z:\fail.txt" } | Should -Throw
         }
 
-        It 'throws if $Variable is empty' {
-            { SetEnvironmentVariable -Variable "" } | Should Throw
+        It 'throws on unrooted path' {
+            { WriteLines -File ".\file.txt" } | Should -Throw
         }
 
-        It 'restricts $Target to limited set' {
-            $result = Test-ParamValidateSet -Command SetEnvironmentVariable -Parameter Target -Values 'Machine','User','Process'
-            $result | Should Be $true
+        It 'throws if lock retry limit has been reached' {
+            $random = Get-Random
+            $file = Join-Path -Path $TestDrive -ChildPath $random
+            New-Item -Path $file
+            $fileLock = [System.IO.File]::Open($file, 'Open', 'ReadWrite', 'None')
+
+            { WriteLines -File $file -Content "Test" -Retries 5} | Should -Throw
+
+            $fileLock.Close()
+        }
+
+        It 'writes content to file'{
+            $file = Join-Path -Path $TestDrive -ChildPath "normalfile.txt"
+            $content = "ABC123"
+
+            WriteLines -File $file -Content $content
+
+            $result = Get-Content -Path $file
+            $result | Should -Be $content
         }
     }
 }

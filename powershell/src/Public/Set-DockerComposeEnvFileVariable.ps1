@@ -13,23 +13,25 @@ Set-StrictMode -Version Latest
 .PARAMETER Path
     Specifies the Docker environment (.env) file path. Assumes .env file is in the current directory by default.
 .EXAMPLE
-    PS C:\> Set-EnvironmentFileVariable -Variable VAR1 -Value "value one"
+    PS C:\> Set-DockerComposeEnvFileVariable -Variable VAR1 -Value "value one"
 .EXAMPLE
-    PS C:\> Set-EnvironmentFileVariable -Variable VAR1 -Value "value one" -Path .\src\.env
+    PS C:\> "value one" | Set-DockerComposeEnvFileVariable "VAR1"
+.EXAMPLE
+    PS C:\> Set-DockerComposeEnvFileVariable -Variable VAR1 -Value "value one" -Path .\src\.env
 .INPUTS
-    None.
+    System.String. You can pipe in the Value parameter.
 .OUTPUTS
     None.
 #>
-function Set-EnvironmentFileVariable
+function Set-DockerComposeEnvFileVariable
 {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [ValidateNotNullOrEmpty()]
         [string]
         $Variable,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNull()]
         [AllowEmptyString()]
         [string]
@@ -37,15 +39,19 @@ function Set-EnvironmentFileVariable
 
         [ValidateScript({ $_ -match '\.env$' })]
         [string]
-        $Path = (Join-Path $MyInvocation.PSScriptRoot ".env")
+        $Path = ".\.env"
     )
 
     if (!(Test-Path $Path)) {
         throw "The environment file $Path does not exist"
     }
 
+    # Escape any '$' to prevent being used as a regex substitution
+    $Value = $Value.Replace('$', '$$')
+
     $found = $false
-    $lines = @(Get-Content $Path | ForEach-Object {
+
+    $lines = @(Get-Content $Path -Encoding UTF8 | ForEach-Object {
         if ($_ -imatch "^$Variable=.*") {
             $_ -ireplace "^$Variable=.*", "$Variable=$Value"
             $found = $true
@@ -59,5 +65,5 @@ function Set-EnvironmentFileVariable
         $lines += "$Variable=$Value"
     }
 
-    $lines | Set-Content $Path
+    WriteLines -File (Resolve-Path $Path) -Content $lines -Encoding ([System.Text.Encoding]::UTF8)
 }
