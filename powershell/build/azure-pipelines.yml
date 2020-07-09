@@ -28,7 +28,7 @@ pool: Default
 stages:
 - stage: Build
 
-  jobs:  
+  jobs:
   - job: Build
     steps:
 
@@ -37,8 +37,13 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer) -Prerelease $(prerelease)
-          Write-Host "Updated module manifest. ModuleVersion: $(moduleVer), Prerelease: $(prerelease)"
+          if ("$(prerelease)") {
+            Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer) -Prerelease $(prerelease)
+            Write-Host "Updated module manifest. ModuleVersion: $(moduleVer), Prerelease: $(prerelease)"
+          } else {
+            Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer)
+            Write-Host "Updated module manifest. ModuleVersion: $(moduleVer)"
+          }
         failOnStderr: true
         workingDirectory: '$(Build.SourcesDirectory)/powershell/src'
     - task: NuGetCommand@2
@@ -62,7 +67,7 @@ stages:
   - job: Pester
     displayName: Run Pester tests
     steps:
-    
+
     - task: Pester@9
       inputs:
         scriptFolder: "$(Build.SourcesDirectory)/powershell/test/*"
@@ -73,7 +78,7 @@ stages:
         testResultsFormat: "NUnit"
         testResultsFiles: "$(Build.SourcesDirectory)/powershell/test/Test-Pester.XML"
         failTaskOnFailedTests: true
-    
+
 - stage: Deploy
   dependsOn: Test
 
