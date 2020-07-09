@@ -1,0 +1,104 @@
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+  paths:
+    include:
+    - 'powershell/*'
+    exclude:
+    - 'image/*'
+
+resources:
+- repo: self
+
+variables:
+  major: 10
+  minor: 0
+  build: $(Build.BuildID)
+  moduleVer: $(major).$(minor).$(build)
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+    prerelease: ''
+  ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
+    prerelease: '-unstable'
+  buildVer: $(moduleVer)$(prerelease)
+
+pool: Default
+
+stages:
+- stage: Build
+
+  jobs:  
+  - job: Build
+    steps:
+
+    - task: PowerShell@2
+      displayName: Update manifest version
+      inputs:
+        targetType: 'inline'
+        script: |
+          Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer) -Prerelease $(prerelease)
+          Write-Host "Updated module manifest. ModuleVersion: $(moduleVer), Prerelease: $(prerelease)"
+        failOnStderr: true
+        workingDirectory: '$(Build.SourcesDirectory)/powershell/src'
+    - task: NuGetCommand@2
+      displayName: NuGet pack
+      inputs:
+        command: 'pack'
+        packagesToPack: '$(Build.SourcesDirectory)/powershell/src/SitecoreDockerTools.nuspec'
+        versioningScheme: byEnvVar
+        versionEnvVar: buildVer
+        buildProperties: 'VERSION=$(buildVer)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'NuGetPackage'
+        publishLocation: 'Container'
+
+- stage: Test
+  dependsOn: Build
+
+  jobs:
+  - job: Pester
+    displayName: Run Pester tests
+    steps:
+    
+    - task: Pester@9
+      inputs:
+        scriptFolder: "$(Build.SourcesDirectory)/powershell/test/*"
+        resultsFile: "$(Build.SourcesDirectory)/powershell/test/Test-Pester.XML"
+        usePSCore: False
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: "NUnit"
+        testResultsFiles: "$(Build.SourcesDirectory)/powershell/test/Test-Pester.XML"
+        failTaskOnFailedTests: true
+    
+- stage: Deploy
+  dependsOn: Test
+
+  jobs:
+  - job: Deploy
+    workspace:
+      clean: all
+    steps:
+
+      - checkout: none
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'NuGetPackage'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: NuGetToolInstaller@1
+        inputs:
+          versionSpec: 5.x
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: |
+            New-Item -Path '$(Pipeline.Workspace)\NuGet.config' -ItemType File -Force
+            Add-Content -Path '$(Pipeline.Workspace)\NuGet.config' -Value '<?xml version="1.0" encoding="utf-8"?> <configuration />'
+            nuget sources add -NonInteractive -Name Temp -Source $(NuGetFeedUrl) -ConfigFile '$(Pipeline.Workspace)\NuGet.config'
+            nuget push -NonInteractive -Source Temp '$(Pipeline.Workspace)/**/*.nupkg' -ConfigFile '$(Pipeline.Workspace)\NuGet.config'
+          failOnStderr: true

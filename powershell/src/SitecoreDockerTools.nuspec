@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>SitecoreDockerTools</id>
+    <version>$VERSION$</version>
+    <authors>Sitecore Corporation A/S</authors>
+    <description>PowerShell extensions for Docker-based Sitecore development</description>
+    <copyright>Copyright (C) by Sitecore A/S</copyright>
+  </metadata>
+</package>

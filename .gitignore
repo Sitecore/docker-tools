@@ -1,0 +1,8 @@
+.vs
+*.log
+obj
+bin
+*.exe
+*.dll
+Packages/
+*.user
