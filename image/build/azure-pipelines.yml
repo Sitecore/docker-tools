@@ -13,23 +13,57 @@ resources:
 - repo: self
 
 variables:
-  major: 10
-  minor: 0
-  build: $(Build.BuildID)
+  sitecoreVersion: 10.0.0
+  revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
+  osName: 1809
+  baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
+  buildImage: mcr.microsoft.com/windows/servercore:ltsc2019
+  buildNumber: $(Build.BuildID)
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     stability: ''
+    namespace: 'tools'
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     stability: '-unstable'
-  buildVer: $(major).$(minor).$(build)$(stability)
+    namespace: 'experimental'
 
 pool: Default
 
 stages:
-- stage: Build
 
-  jobs:  
+- stage: Versioning
+
+  jobs:
+  - job: Tagging
+    steps:
+
+    - task: PowerShell@2
+      name: Tags
+      displayName: Generate tags
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Pulling base image $(baseImage)..."
+          docker pull $(baseImage)
+
+          [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
+          Write-Host "Image OS version is '$osVersion'"
+
+          [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
+          [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
+          Write-Host "Setting long tag to '$longTag'"
+          Write-Host "Setting short tag to '$shortTag'"
+          Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
+          Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
+
+- stage: Build
+  dependsOn: Versioning
+
+  jobs:
   - job: Build
     displayName: Build image
+    variables:
+      longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
+      shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
     steps:
 
     - task: DockerCompose@0
@@ -39,9 +73,12 @@ stages:
         dockerRegistryEndpoint: '$(RegistryServiceConnection)'
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(Registry)/$(RegistryProject)/
-          VERSION=$(buildVer)
+          REGISTRY=$(Registry)/$(namespace)/
+          VERSION=$(longTag)
+          BASE_IMAGE=$(baseImage)
+          BUILD_IMAGE=$(buildImage)
         action: 'Build services'
+        additionalImageTags: '$(shortTag)'
         arguments: '--force-rm'
         currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
 
@@ -52,7 +89,7 @@ stages:
   - job: Pester
     displayName: Run Pester tests
     steps:
-    
+
     - task: Pester@9
       inputs:
         scriptFolder: "$(Build.SourcesDirectory)/image/test/*"
@@ -63,13 +100,18 @@ stages:
         testResultsFormat: "NUnit"
         testResultsFiles: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
         failTaskOnFailedTests: true
-    
+
 - stage: Push
-  dependsOn: Test
+  dependsOn:
+  - Versioning
+  - Test
 
   jobs:
   - job: Push
     displayName: Push image
+    variables:
+      longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
+      shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
     steps:
 
     - task: Docker@2
@@ -77,7 +119,7 @@ stages:
       inputs:
         containerRegistry: '$(RegistryServiceConnection)'
         command: 'login'
-    
+
     - task: DockerCompose@0
       displayName: Push image
       inputs:
@@ -85,7 +127,10 @@ stages:
         dockerRegistryEndpoint: '$(RegistryServiceConnection)'
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(Registry)/$(RegistryProject)/
-          VERSION=$(buildVer)
+          REGISTRY=$(Registry)/$(namespace)/
+          VERSION=$(longTag)
+          BASE_IMAGE=$(baseImage)
+          BUILD_IMAGE=$(buildImage)
         action: 'Push services'
+        additionalImageTags: '$(shortTag)'
         currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'

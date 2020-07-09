@@ -3,7 +3,7 @@ version: "3.7"
 services:
 
   tools:
-    image: ${REGISTRY}sitecore-docker-tools:${VERSION:-latest}
+    image: ${REGISTRY}sitecore-docker-tools-assets:${VERSION:-latest}
     build:
       context: .
       args:
