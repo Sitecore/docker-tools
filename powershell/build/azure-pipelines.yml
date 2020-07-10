@@ -13,14 +13,13 @@ resources:
 - repo: self
 
 variables:
-  major: 10
-  minor: 0
-  build: $(Build.BuildID)
-  moduleVer: $(major).$(minor).$(build)
+  sitecoreVersion: 10.0
+  revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 0)]
+  moduleVer: $(sitecoreVersion).$(revision)
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     prerelease: ''
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
-    prerelease: '-unstable'
+    prerelease: $[format('-unstable{0}', variables['Build.BuildID'])]
   buildVer: $(moduleVer)$(prerelease)
 
 pool: Default
