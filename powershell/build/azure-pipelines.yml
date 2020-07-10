@@ -19,7 +19,7 @@ variables:
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     prerelease: ''
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
-    prerelease: $[format('-unstable{0}', variables['Build.BuildID'])]
+    prerelease: '-unstable'
   buildVer: $(moduleVer)$(prerelease)
 
 pool: Default
