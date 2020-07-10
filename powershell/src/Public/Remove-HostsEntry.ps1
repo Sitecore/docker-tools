@@ -1,5 +1,20 @@
 Set-StrictMode -Version Latest
 
+<#
+.SYNOPSIS
+    Removes a host entry from the system hosts file.
+.DESCRIPTION
+    Removes a host entry with the specified Hostname from the system hosts file (if it exist).
+    A backup of the current hosts file is taken before updating.
+.PARAMETER Hostname
+    The hostname to remove.
+.INPUTS
+    None. You cannot pipe objects to Remove-HostsEntry.
+.OUTPUTS
+    None. Remove-HostsEntry does not generate any output.
+.EXAMPLE
+    PS C:\> Remove-HostsEntry 'my.host.name'
+#>
 function Remove-HostsEntry
 {
     Param (

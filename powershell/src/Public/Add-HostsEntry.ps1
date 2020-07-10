@@ -1,5 +1,22 @@
 Set-StrictMode -Version Latest
 
+<#
+.SYNOPSIS
+    Adds a host entry to the system hosts file.
+.DESCRIPTION
+    Adds a host entry with the specified Hostname and IPAddress to the system hosts file (if it does not already exist).
+    A backup of the current hosts file is taken before updating.
+.PARAMETER Hostname
+    The hostname to use for the entry.
+.PARAMETER IPAddress
+    The IP address to use for the entry. Default is 127.0.0.1.
+.INPUTS
+    None. You cannot pipe objects to Add-HostsEntry.
+.OUTPUTS
+    None. Add-HostsEntry does not generate any output.
+.EXAMPLE
+    PS C:\> Add-HostsEntry 'my.host.name'
+#>
 function Add-HostsEntry
 {
     Param (
