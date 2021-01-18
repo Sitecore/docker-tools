@@ -19,6 +19,8 @@ variables:
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
   buildImage: mcr.microsoft.com/windows/servercore:ltsc2019
   buildNumber: $(Build.BuildID)
+  REGISTRY: $(Registry)
+  REGISTRY_SERVICE_CONNECTION: $(RegistryServiceConnection)
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     stability: ''
     namespace: 'tools'
@@ -70,10 +72,10 @@ stages:
       displayName: Build image
       inputs:
         containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: '$(RegistryServiceConnection)'
+        dockerRegistryEndpoint: '$(REGISTRY_SERVICE_CONNECTION)'
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(Registry)/$(namespace)/
+          REGISTRY=$(REGISTRY)/$(namespace)/
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
@@ -117,17 +119,17 @@ stages:
     - task: Docker@2
       displayName: Login to registry
       inputs:
-        containerRegistry: '$(RegistryServiceConnection)'
+        containerRegistry: '$(REGISTRY_SERVICE_CONNECTION)'
         command: 'login'
 
     - task: DockerCompose@0
       displayName: Push image
       inputs:
         containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: '$(RegistryServiceConnection)'
+        dockerRegistryEndpoint: '$(REGISTRY_SERVICE_CONNECTION)'
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(Registry)/$(namespace)/
+          REGISTRY=$(REGISTRY)/$(namespace)/
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
