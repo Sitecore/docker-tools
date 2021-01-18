@@ -2,8 +2,10 @@
 
 Sitecore Docker Tools are utilities which improve developer experience when running Sitecore in a Docker environment. This includes:
 
-* `sitecore-docker-tools-assets`, a Docker image with development scripts and entrypoints which can be used during Sitecore container builds.
+*  `sitecore-docker-tools-assets`, a Docker image with development scripts and entrypoints which can be used during Sitecore container builds.
+[![Image Build Status](https://dev.azure.com/sitecore-devex/docker-tools/_apis/build/status/DockerTools.Image?branchName=main)](https://dev.azure.com/sitecore-devex/docker-tools/_build/latest?definitionId=9&branchName=main)
 * `SitecoreDockerTools`, a PowerShell module with functions used on the Sitecore container host to initialize the Sitecore Docker environment.
+[![PowrShell Build Status](https://dev.azure.com/sitecore-devex/docker-tools/_apis/build/status/DockerTools.PowerShell?branchName=main)](https://dev.azure.com/sitecore-devex/docker-tools/_build/latest?definitionId=10&branchName=main)
 
 ## Usage
 
