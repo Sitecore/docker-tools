@@ -72,7 +72,7 @@ stages:
       displayName: Build image
       inputs:
         containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: '$(REGISTRY_SERVICE_CONNECTION)'
+        dockerRegistryEndpoint: $(REGISTRY_SERVICE_CONNECTION)
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
           REGISTRY=$(REGISTRY)/$(namespace)/
@@ -126,7 +126,7 @@ stages:
       displayName: Push image
       inputs:
         containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: '$(REGISTRY_SERVICE_CONNECTION)'
+        dockerRegistryEndpoint: $(REGISTRY_SERVICE_CONNECTION)
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
           REGISTRY=$(REGISTRY)/$(namespace)/
