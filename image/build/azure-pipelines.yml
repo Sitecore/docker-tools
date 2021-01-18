@@ -19,7 +19,7 @@ variables:
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
   buildImage: mcr.microsoft.com/windows/servercore:ltsc2019
   buildNumber: $(Build.BuildID)
-  REGISTRY: $(Registry)
+  REGISTRY_MAPPED: $(Registry)
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     stability: ''
     namespace: 'tools'
@@ -74,7 +74,7 @@ stages:
         dockerRegistryEndpoint: '$(RegistryServiceConnection)'
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(REGISTRY)/$(namespace)/
+          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
@@ -128,7 +128,7 @@ stages:
         dockerRegistryEndpoint: '$(RegistryServiceConnection)'
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(REGISTRY)/$(namespace)/
+          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
