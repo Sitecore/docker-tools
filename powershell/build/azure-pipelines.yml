@@ -2,7 +2,18 @@ trigger:
   branches:
     include:
     - master
-    - develop
+    - dev
+  paths:
+    include:
+    - 'powershell/*'
+    exclude:
+    - 'image/*'
+
+pr:
+  branches:
+    include:
+    - master
+    - dev
   paths:
     include:
     - 'powershell/*'
@@ -80,6 +91,7 @@ stages:
 
 - stage: Deploy
   dependsOn: Test
+  condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Deploy
