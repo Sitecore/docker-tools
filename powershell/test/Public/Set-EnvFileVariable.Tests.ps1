@@ -17,7 +17,7 @@
         }
 
         It 'throws if $Path is invalid' {
-            { Set-EnvFileVariable -Variable "foo" -Value "bar" -Path $TestDrive } | Should -Throw
+            { Set-EnvFileVariable -Variable "foo" -Value "bar" -Path "$TestDrive\.baz" } | Should -Throw
         }
 
         It 'throws if $Variable is $null or empty' {
