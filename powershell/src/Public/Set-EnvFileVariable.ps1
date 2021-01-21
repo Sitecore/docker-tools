@@ -67,4 +67,5 @@ function Set-EnvFileVariable
     WriteLines -File (Resolve-Path $Path) -Content $lines -Encoding ([System.Text.Encoding]::UTF8)
 }
 
-New-Alias -Name Set-EnvFileVariable -Value Set-EnvFileVariable
+# For backward compatibility
+New-Alias -Name Set-DockerComposeEnvFileVariable -Value Set-EnvFileVariable

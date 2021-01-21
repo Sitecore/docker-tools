@@ -128,6 +128,12 @@
             $envFile | Should -FileContentMatchExactly '^foo=baz$'
         }
 
+        It 'is aliased under old name Set-DockerComposeEnvFileVariable' {
+            Set-Content $envFile -Value ''
+            Set-DockerComposeEnvFileVariable -Path $envFile -Variable 'VAR' -Value 'VAL'
+            $envFile | Should -FileContentMatchExactly '^VAR=VAL$'
+        }
+
         Context 'Encoding' {
             Mock WriteLines
             Mock Get-Content
