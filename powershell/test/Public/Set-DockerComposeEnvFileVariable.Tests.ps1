@@ -20,13 +20,6 @@
             { Set-DockerComposeEnvFileVariable -Variable "foo" -Value "bar" -Path $TestDrive } | Should -Throw
         }
 
-        It 'throws if $Path is not a .env file' {
-            $textFile = Join-Path $TestDrive 'test.txt'
-            Set-Content $textFile -Value "Lorem ipsum dolor sit amet."
-
-            { Set-DockerComposeEnvFileVariable -Variable "foo" -Value "bar" -Path $textFile } | Should -Throw
-        }
-
         It 'throws if $Variable is $null or empty' {
             { Set-DockerComposeEnvFileVariable -Variable $null -Value "bar" -Path $envFile } | Should -Throw
             { Set-DockerComposeEnvFileVariable -Variable "" -Value "bar" -Path $envFile } | Should -Throw

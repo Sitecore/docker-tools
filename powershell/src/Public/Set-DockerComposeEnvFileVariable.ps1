@@ -37,7 +37,6 @@ function Set-DockerComposeEnvFileVariable
         [string]
         $Value,
 
-        [ValidateScript({ $_ -match '\.env$' })]
         [string]
         $Path = ".\.env"
     )
