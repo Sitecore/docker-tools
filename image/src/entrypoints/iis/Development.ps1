@@ -48,6 +48,22 @@ else
     Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: Skipping start of '$watchDirectoryJobName'. To enable you should mount a directory into 'C:\deploy'."
 }
 
+
+# RFC: Apply development Web.config transforms on startup
+# TODO: Clean up and make testable
+# Example: SITECORE_DEVELOPMENT_TRANSFORMS=CustomErrors,Debug,OptimizeCompilations
+$transforms = $env:SITECORE_DEVELOPMENT_TRANSFORMS
+if ($transforms) {
+    $env:SITECORE_DEVELOPMENT_TRANSFORMS.Split(",|") | ForEach-Object {
+        $folder = "..\..\dev-transforms\$_"
+        if (-not (Test-Path $folder)) {
+            Write-Host "** Sitecore Development Transform $_ not found"
+        } else {
+            ..\..\scripts\Invoke-XdtTransform.ps1 -XdtPath $folder -Path $WatchDirectoryParameters.Destination
+        }
+    }
+}
+
 # Print ready message
 Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: ready!"
 
