@@ -48,20 +48,18 @@ else
     Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: Skipping start of '$watchDirectoryJobName'. To enable you should mount a directory into 'C:\deploy'."
 }
 
-
-# RFC: Apply development Web.config transforms on startup
-# TODO: Clean up and make testable
-# Example: SITECORE_DEVELOPMENT_TRANSFORMS=CustomErrors,Debug,OptimizeCompilations
-$transforms = $env:SITECORE_DEVELOPMENT_TRANSFORMS
-if ($transforms) {
-    $env:SITECORE_DEVELOPMENT_TRANSFORMS.Split(",|") | ForEach-Object {
-        $folder = "..\..\dev-transforms\$_"
-        if (-not (Test-Path $folder)) {
-            Write-Host "** Sitecore Development Transform $_ not found"
-        } else {
-            ..\..\scripts\Invoke-XdtTransform.ps1 -XdtPath $folder -Path $WatchDirectoryParameters.Destination
-        }
+# Apply any patch folders configured in SITECORE_DEVELOPMENT_PATCHES
+Write-Host "$(Get-Date -Format $timeFormat): Applying SITECORE_DEVELOPMENT_PATCHES..."
+Push-Location $PSScriptRoot\..\..\
+try {
+    . .\scripts\Get-PatchFolders.ps1
+    Get-PatchFolders -Path dev-patches | ForEach-Object {
+        Write-Host "$(Get-Date -Format $timeFormat): Applying development patches from $($_.Name)"
+        & .\scripts\Invoke-XdtTransform.ps1 -XdtPath $_.FullName -Path $WatchDirectoryParameters.Destination
+        & .\scripts\Install-ConfigurationFolder.ps1 -PatchPath $_.FullName -Path $WatchDirectoryParameters.Destination
     }
+} finally {
+    Pop-Location
 }
 
 # Print ready message
