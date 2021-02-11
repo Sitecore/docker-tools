@@ -65,4 +65,4 @@ try {
 # Print ready message
 Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: ready!"
 
-& "C:\LogMonitor\LogMonitor.exe" "C:\ServiceMonitor.exe" "w3svc"
+& "C:\LogMonitor\LogMonitor.exe" "powershell" "C:\Run-W3SVCService.ps1"
