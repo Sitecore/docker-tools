@@ -48,7 +48,21 @@ else
     Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: Skipping start of '$watchDirectoryJobName'. To enable you should mount a directory into 'C:\deploy'."
 }
 
+# Apply any patch folders configured in SITECORE_DEVELOPMENT_PATCHES
+Write-Host "$(Get-Date -Format $timeFormat): Applying SITECORE_DEVELOPMENT_PATCHES..."
+Push-Location $PSScriptRoot\..\..\
+try {
+    . .\scripts\Get-PatchFolders.ps1
+    Get-PatchFolders -Path dev-patches | ForEach-Object {
+        Write-Host "$(Get-Date -Format $timeFormat): Applying development patches from $($_.Name)"
+        & .\scripts\Invoke-XdtTransform.ps1 -XdtPath $_.FullName -Path $WatchDirectoryParameters.Destination
+        & .\scripts\Install-ConfigurationFolder.ps1 -PatchPath $_.FullName -Path $WatchDirectoryParameters.Destination
+    }
+} finally {
+    Pop-Location
+}
+
 # Print ready message
 Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: ready!"
 
-& "C:\LogMonitor\LogMonitor.exe" "C:\ServiceMonitor.exe" "w3svc"
+& "C:\LogMonitor\LogMonitor.exe" "powershell" "C:\Run-W3SVCService.ps1"

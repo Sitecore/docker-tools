@@ -2,7 +2,18 @@ trigger:
   branches:
     include:
     - master
-    - develop
+    - dev
+  paths:
+    include:
+    - 'powershell/*'
+    exclude:
+    - 'image/*'
+
+pr:
+  branches:
+    include:
+    - master
+    - dev
   paths:
     include:
     - 'powershell/*'
@@ -13,7 +24,7 @@ resources:
 - repo: self
 
 variables:
-  sitecoreVersion: 10.0
+  sitecoreVersion: 10.1
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 0)]
   moduleVer: $(sitecoreVersion).$(revision)
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
@@ -80,6 +91,7 @@ stages:
 
 - stage: Deploy
   dependsOn: Test
+  condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Deploy

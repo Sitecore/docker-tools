@@ -27,7 +27,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Get-SitecoreRandomString','ConvertTo-CompressedBase64String','Get-SitecoreCertificateAsBase64String','Set-DockerComposeEnvFileVariable','Add-HostsEntry','Remove-HostsEntry')
+    FunctionsToExport = @('Get-SitecoreRandomString','ConvertTo-CompressedBase64String','Get-SitecoreCertificateAsBase64String','Set-EnvFileVariable','Add-HostsEntry','Remove-HostsEntry','Write-SitecoreDockerWelcome')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @()
@@ -36,7 +36,7 @@
     # VariablesToExport = '*'
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport = @()
+    AliasesToExport = @('Set-DockerComposeEnvFileVariable')
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData = @{

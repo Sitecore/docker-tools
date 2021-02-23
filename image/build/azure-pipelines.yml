@@ -2,7 +2,18 @@ trigger:
   branches:
     include:
     - master
-    - develop
+    - dev
+  paths:
+    include:
+    - 'image/*'
+    exclude:
+    - 'powershell/*'
+
+pr:
+  branches:
+    include:
+    - master
+    - dev
   paths:
     include:
     - 'image/*'
@@ -13,7 +24,7 @@ resources:
 - repo: self
 
 variables:
-  sitecoreVersion: 10.0.0
+  sitecoreVersion: 10.1.0
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
   osName: 1809
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
@@ -106,6 +117,7 @@ stages:
   dependsOn:
   - Versioning
   - Test
+  condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Push
