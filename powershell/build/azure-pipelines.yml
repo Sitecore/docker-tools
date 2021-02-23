@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-    - master
+    - main
     - dev
   paths:
     include:
@@ -12,7 +12,7 @@ trigger:
 pr:
   branches:
     include:
-    - master
+    - main
     - dev
   paths:
     include:
@@ -27,9 +27,9 @@ variables:
   sitecoreVersion: 10.1
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 0)]
   moduleVer: $(sitecoreVersion).$(revision)
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     prerelease: ''
-  ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     prerelease: '-unstable'
   buildVer: $(moduleVer)$(prerelease)
 
