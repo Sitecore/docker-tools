@@ -21,8 +21,7 @@ Set-StrictMode -Version Latest
 .OUTPUTS
     System.String. Value of variable. System.Exception if key is not present
 #>
-function Get-EnvFileVariable
-{
+function Get-EnvFileVariable {
     Param (
         [Parameter(Mandatory = $true, Position = 0)]
         [ValidateNotNullOrEmpty()]
@@ -39,8 +38,13 @@ function Get-EnvFileVariable
 
     $variables = Get-EnvFileContent $Path
     try {
-        $value = $variables.Get_Item($variable)
-        return $value
+        if ($variables.ContainsKey($variable)) {
+            $value = $variables.Get_Item($variable)
+            return $value
+        }
+        else {
+            throw "Unable to find value for $Variable in $Path"
+        }
     }
     catch {
         throw "Unable to find value for $Variable in $Path"
