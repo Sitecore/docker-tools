@@ -39,8 +39,7 @@ function Get-EnvFileVariable {
     $variables = Get-EnvFileContent $Path
     try {
         if ($variables.ContainsKey($variable)) {
-            $value = $variables.Get_Item($variable)
-            return $value
+            return $variables.Get_Item($variable)
         }
         else {
             throw "Unable to find value for $Variable in $Path"
