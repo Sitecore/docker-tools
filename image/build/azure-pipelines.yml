@@ -2,6 +2,7 @@ trigger:
   branches:
     include:
     - master
+    - release/*
     - develop
   paths:
     include:
@@ -19,10 +20,10 @@ variables:
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
   buildImage: mcr.microsoft.com/windows/servercore:ltsc2019
   buildNumber: $(Build.BuildID)
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release')) }}:
     stability: ''
     namespace: 'tools'
-  ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if not(or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release'))) }}:
     stability: '-unstable'
     namespace: 'experimental'
 

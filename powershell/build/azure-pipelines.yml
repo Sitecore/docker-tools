@@ -17,9 +17,9 @@ variables:
   sitecoreVersion: 10.0
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 0)]
   moduleVer: $(sitecoreVersion).$(revision)
-  ${{ if or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release/')) }}:
+  ${{ if or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release')) }}:
     prerelease: ''
-  ${{ if not(or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release/'))) }}:
+  ${{ if not(or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release'))) }}:
     prerelease: '-unstable'
   buildVer: $(moduleVer)$(prerelease)
 
