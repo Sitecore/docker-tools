@@ -2,6 +2,7 @@ trigger:
   branches:
     include:
     - master
+    - release/*
     - develop
   paths:
     include:
@@ -16,9 +17,10 @@ variables:
   sitecoreVersion: 10.0
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 0)]
   moduleVer: $(sitecoreVersion).$(revision)
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  isRelease: $[or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release/'))]
+  ${{ if eq(variables['isRelease'], true) }}:
     prerelease: ''
-  ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if eq(variables['isRelease'], false) }}:
     prerelease: '-unstable'
   buildVer: $(moduleVer)$(prerelease)
 
