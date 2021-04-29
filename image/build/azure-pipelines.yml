@@ -20,10 +20,10 @@ variables:
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
   buildImage: mcr.microsoft.com/windows/servercore:ltsc2019
   buildNumber: $(Build.BuildID)
-  ${{ if or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release')) }}:
+  ${{ if or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')) }}:
     stability: ''
     namespace: 'tools'
-  ${{ if not(or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranchName'], 'release'))) }}:
+  ${{ if not(or(eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
     stability: '-unstable'
     namespace: 'experimental'
 
