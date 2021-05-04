@@ -51,4 +51,10 @@ else
 # Print ready message
 Write-Host "$(Get-Date -Format $timeFormat): Development ENTRYPOINT: ready!"
 
-& "C:\LogMonitor\LogMonitor.exe" "powershell" "C:\Run-W3SVCService.ps1"
+if (Test-Path "C:\Run-W3SVCService.ps1") {
+    # 10.0.1 -- New script resolves issues with ServiceMonitor and LTSC2019
+    & "C:\LogMonitor\LogMonitor.exe" "powershell" "C:\Run-W3SVCService.ps1"
+} else {
+    # 10.0.0
+    & "C:\LogMonitor\LogMonitor.exe" "C:\ServiceMonitor.exe" "w3svc"
+}
