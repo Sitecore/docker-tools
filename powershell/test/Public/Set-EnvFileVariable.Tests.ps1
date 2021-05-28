@@ -34,7 +34,7 @@
         It 'adds variable on new line to end of file' {
             Set-Content $envFile -Value 'VAR1=VAL1'
             Set-EnvFileVariable -Path $envFile -Variable 'VAR2' -Value 'VAL2'
-            $envFile | Should -FileContentMatchMultiline '^VAR1=VAL1\r\nVAR2=VAL2\r\n$'
+            $envFile | Should -FileContentMatchMultiline '^VAR1=VAL1\r?\nVAR2=VAL2\r?\n$'
         }
 
         It 'sets existing variable with value to new value' {
@@ -143,7 +143,7 @@
 
                 Assert-MockCalled Get-Content -Times 1 -Exactly -ParameterFilter {
                     $Path -eq $envFile -and `
-                    $Encoding -eq 'UTF8'
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")
                 } -Scope It
             }
 
@@ -152,7 +152,7 @@
 
                 Assert-MockCalled WriteLines -Times 1 -Exactly -ParameterFilter {
                     $File -eq $envFile -and `
-                    $Encoding -eq [System.Text.Encoding]::UTF8
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding+UTF8EncodingSealed" -or $Encoding.ToString() -eq "System.Text.UTF8Encoding")
                 } -Scope It
             }
         }

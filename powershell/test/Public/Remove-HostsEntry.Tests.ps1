@@ -65,7 +65,7 @@
 
                 Assert-MockCalled Get-Content -Times 1 -Exactly -ParameterFilter {
                     $Path -eq $hostsPath -and `
-                    $Encoding -eq 'UTF8'
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")
                 } -Scope It
             }
 
@@ -74,7 +74,7 @@
 
                 Assert-MockCalled WriteLines -Times 1 -Exactly -ParameterFilter {
                     $File -eq $hostsPath -and `
-                    $Encoding -eq [System.Text.Encoding]::UTF8
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding+UTF8EncodingSealed" -or $Encoding.ToString() -eq "System.Text.UTF8Encoding")
                 } -Scope It
             }
         }
@@ -82,7 +82,7 @@
         Context 'When the hosts file is empty' {
             Mock Get-Content {
                 return $null
-            } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
+            } -ParameterFilter { $Path -eq $hostsPath -and ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")}
 
             Mock WriteLines
 
@@ -98,7 +98,7 @@
         Context 'When the hosts file contains only comments' {
             Mock Get-Content {
                 return @("# Hosts file comment")
-            } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
+            } -ParameterFilter { $Path -eq $hostsPath -and ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")}
 
             Mock WriteLines
 
@@ -114,7 +114,7 @@
         Context 'When there are no matching host headers in the host file' {
             Mock Get-Content {
                 return @("10.10.10.10`thostName1", "20.20.20.20`thostName2", "30.30.30.30`thostName3")
-            } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
+            } -ParameterFilter { $Path -eq $hostsPath -and ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")}
 
             Mock WriteLines
 
@@ -130,7 +130,7 @@
         Context 'When there is single host header in the hosts file' {
             Mock Get-Content {
                 return @("10.10.10.10`thostName1")
-            } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
+            } -ParameterFilter { $Path -eq $hostsPath -and ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")}
 
             Mock WriteLines
 
@@ -141,7 +141,7 @@
                 Assert-MockCalled WriteLines -Times 1 -Exactly -ParameterFilter {
                     $File -eq $hostsPath -and `
                     $Content -eq $null -and `
-                    $Encoding -eq [System.Text.Encoding]::UTF8
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding+UTF8EncodingSealed" -or $Encoding.ToString() -eq "System.Text.UTF8Encoding")
                 }
             }
         }
@@ -149,7 +149,7 @@
         Context 'When there are single host header and comment in the hosts file' {
             Mock Get-Content {
                 return @("# Hosts file comment", "10.10.10.10`thostName1")
-            } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
+            } -ParameterFilter { $Path -eq $hostsPath -and ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")}
 
             Mock WriteLines
 
@@ -159,7 +159,7 @@
                 Assert-MockCalled WriteLines -Times 1 -Exactly -ParameterFilter {
                     $File -eq $hostsPath -and `
                     @(Compare-Object -ReferenceObject @("# Hosts file comment") -DifferenceObject $Content).Count -eq 0 -and `
-                    $Encoding -eq [System.Text.Encoding]::UTF8
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding+UTF8EncodingSealed" -or $Encoding.ToString() -eq "System.Text.UTF8Encoding")
                 }
             }
         }
@@ -167,7 +167,7 @@
         Context 'When there are multiple host headers in the hosts file' {
             Mock Get-Content {
                 return @("10.10.10.10`thostName1", "20.20.20.20`thostName2", "30.30.30.30`thostName3")
-            } -ParameterFilter { $Path -eq $hostsPath -and $Encoding -eq "UTF8"}
+            } -ParameterFilter { $Path -eq $hostsPath -and ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")}
 
             Mock WriteLines
 
@@ -177,7 +177,7 @@
                 Assert-MockCalled WriteLines -Times 1 -Exactly -ParameterFilter {
                     $File -eq $hostsPath -and `
                     @(Compare-Object -ReferenceObject @("10.10.10.10`thostName1", "30.30.30.30`thostName3") -DifferenceObject $Content).Count -eq 0 -and `
-                    $Encoding -eq [System.Text.Encoding]::UTF8
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding+UTF8EncodingSealed" -or $Encoding.ToString() -eq "System.Text.UTF8Encoding")
                 }
             }
         }

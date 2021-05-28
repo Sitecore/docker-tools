@@ -68,7 +68,7 @@
 
                 Assert-MockCalled Get-Content -Times 1 -Exactly -ParameterFilter {
                     $Path -eq $hostsPath -and `
-                    $Encoding -eq 'UTF8'
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding" -or $Encoding.ToString() -eq "UTF8")
                 } -Scope It
             }
 
@@ -77,7 +77,7 @@
 
                 Assert-MockCalled WriteLines -Times 1 -Exactly -ParameterFilter {
                     $File -eq $hostsPath -and `
-                    $Encoding -eq [System.Text.Encoding]::UTF8
+                    ($Encoding.ToString() -eq "System.Text.UTF8Encoding+UTF8EncodingSealed" -or $Encoding.ToString() -eq "System.Text.UTF8Encoding")
                 } -Scope It
             }
         }
