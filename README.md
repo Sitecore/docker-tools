@@ -12,12 +12,25 @@ Sitecore Docker Tools are utilities which improve developer experience when runn
 Released versions of these utilities can be found on the Sitecore Container Registry and the Sitecore PowerShell Gallery. Usage details can be found in the [Sitecore container development documentation](https://doc.sitecore.com/developers/100/developer-tools/en/containers-in-sitecore-development.html).
 
 ### Docker Image
-The scripts found in the Docker image are intended to be copied in via your custom `Dockerfile`, then used within it or your `docker-compose` override.
+The scripts found in the Docker image are intended to be copied in via your custom `Dockerfile`.
 
 ```Dockerfile
 FROM ${TOOLS_IMAGE} as tools
 FROM ${PARENT_IMAGE}
 COPY --from=tools C:\tools C:\tools
+```
+
+You can enable the [development entrypoint](https://doc.sitecore.com/developers/100/developer-tools/en/deploying-files-into-running-containers.html#idp15256) in your `docker-compose` override.
+
+```yml
+entrypoint: powershell.exe -Command "& C:\tools\entrypoints\iis\Development.ps1"
+```
+
+The development entrypoint also enables the application of development-specific configuration patches and configuration transforms at runtime via the `SITECORE_DEVELOPMENT_PATCHES` environment variable. You can see [available patches here](image/src/dev-patches).
+
+```yml
+environment:
+  SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,DiagnosticsOff,InitMessagesOff,RobotDetectionOff
 ```
 
 ### PowerShell Module
