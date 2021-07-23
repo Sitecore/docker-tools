@@ -5,8 +5,8 @@ Set-StrictMode -Version Latest
 Multifunctional script to work with self-signed certificate.
 
 .DESCRIPTION
-This script is able to create regular self signed certificates and also certificates for Trusted Authority (CA). It also can sign one self signed 
-certificate with another one. There is also methods to store certificates to physical file with .crt extension and private key to physical file 
+This script is able to create regular self signed certificates and also certificates for Trusted Authority (CA). It also can sign one self signed
+certificate with another one. There is also methods to store certificates to physical file with .crt extension and private key to physical file
 with .key extension. Requires powershell core.
 
 .EXAMPLE
@@ -16,10 +16,10 @@ Create-CertificateFile -Certificate $rootCertificate -OutCertPath "<Path_to_fold
 
 $dnsNames = @('dns1', 'dns2', 'dns3'...)
 
-$dnsNames | ForEach-Object {	
+$dnsNames | ForEach-Object {
 	$selfSignedKey = Create-RSAKey
 	$certificate = Create-SelfSignedCertificateWithSignature -Key $selfSignedKey -CommonName $_ -DnsName $_ -RootCertificate $rootCertificate
-	
+
 	Create-KeyFile -Key $selfSignedKey -OutKeyPath "<Path_to_folder>\$_.key"
 	Create-CertificateFile -Certificate $certificate -OutCertPath "<Path_to_folder>\$_.crt"
 }
@@ -34,7 +34,7 @@ class CertificateDistinguishedName
     [ValidateNotNullOrEmpty()]
     [string]$CommonName
 
-    # 2-character ISO country code 
+    # 2-character ISO country code
     [ValidateLength(2, 2)]
     [string]$Country
 
@@ -51,7 +51,7 @@ class CertificateDistinguishedName
     [string] Format([char]$Separator, [bool]$UseQuotes)
     {
         $sb = [System.Text.StringBuilder]::new()
-    
+
         if ($UseQuotes)
         {
             $sb.Append("CN=`"$($this.CommonName)`"")
@@ -196,7 +196,7 @@ function Create-RSAKey {
         [int]
         $KeyLength = 2048
     )
-	
+
 	return [System.Security.Cryptography.RSA]::Create($KeyLength)
 }
 
@@ -237,34 +237,34 @@ function Create-SelfSignedCertificate {
         [Parameter(Mandatory=$true)]
         [System.Security.Cryptography.RSA]
         $Key,
-		
+
         [Parameter()]
         [Alias("CN")]
         [string]
         $CommonName = "Sitecore Docker Compose Development Self-Signed Authority",
-		
+
         [Parameter()]
         [Alias("C")]
         [string]
         $Country = "US",
-		
+
         [Parameter()]
         [Alias("O")]
         [string]
         $Organization = "Sitecore-Development",
-		
+
         [Parameter()]
         [bool]
         $ForCertificateAuthority = $true,
-		
+
         [Parameter()]
         [System.Security.Cryptography.X509Certificates.X509KeyUsageFlags[]]
         $KeyUsage = @('DigitalSignature', 'CrlSign', 'KeyCertSign'),
-		
+
         [Parameter()]
         [System.DateTimeOffset]
         $NotBefore = [System.DateTimeOffset]::Now,
-		
+
         [Parameter()]
         [System.DateTimeOffset]
         $NotAfter = [System.DateTimeOffset]::Now.AddDays(3652)
@@ -293,7 +293,7 @@ function Create-SelfSignedCertificate {
     $subjectKeyIdentifier = [System.Security.Cryptography.X509Certificates.X509SubjectKeyIdentifierExtension]::new(
         $certRequest.PublicKey,
         <# critical #> $false)
-            
+
     $extensions.Add($subjectKeyIdentifier)
 
     # Create Authority Key Identifier
@@ -369,39 +369,39 @@ function Create-SelfSignedCertificateWithSignature {
         [Parameter(Mandatory=$true)]
         [System.Security.Cryptography.RSA]
         $Key,
-		
+
         [Parameter()]
         [Alias("CN")]
         [string]
         $CommonName = "localhost",
-		
+
         [Parameter()]
         [Alias("C")]
         [string]
         $Country = "US",
-		
+
         [Parameter()]
         [Alias("O")]
         [string]
         $Organization = "Sitecore-Development",
-		
+
         [Parameter()]
         [string]
         $DnsName = "localhost",
-		
+
         [Parameter(Mandatory=$true)]
         [System.Security.Cryptography.X509Certificates.X509Certificate2]
         $RootCertificate,
-		
+
         [Parameter()]
         [System.DateTimeOffset]
         $NotBefore = [System.DateTimeOffset]::Now,
-		
+
         [Parameter()]
         [System.DateTimeOffset]
         $NotAfter = [System.DateTimeOffset]::Now.AddDays(3650)
     )
-	
+
     # Construct the subject name
     $subjectName = [CertificateDistinguishedName] (Get-FalsyRemovedHashtable -Hashtable @{
         CommonName = $CommonName
@@ -426,7 +426,7 @@ function Create-SelfSignedCertificateWithSignature {
     $certRequest.CertificateExtensions.Add($altBuilder)
 
     $uniqueId = [System.BitConverter]::GetBytes([System.DateTime]::Now.ToBinary())
-     
+
     # Create sertificate, signed by RootCA
     $cert = $certRequest.Create($RootCertificate, $NotBefore, $NotAfter, $uniqueId)
 
@@ -448,7 +448,7 @@ function Create-CertificateFile {
         [Parameter(Mandatory=$true)]
         [System.Security.Cryptography.X509Certificates.X509Certificate2]
         $Certificate,
-		
+
         [Parameter()]
         [string]
         $OutCertPath = $pwd
@@ -478,14 +478,17 @@ function Create-KeyFile {
         [Parameter(Mandatory=$true)]
         [System.Security.Cryptography.RSA]
         $Key,
-		
+
         [Parameter()]
         [string]
         $OutKeyPath = $pwd
     )
+    $parameters = $Key.ExportParameters($true)
+	$data = [RSAKeyUtils]::PrivateKeyToPKCS8($parameters)
+
     $content = @(
 	    '-----BEGIN PRIVATE KEY-----'
-	    [System.Convert]::ToBase64String($Key.ExportRSAPrivateKey(), 'InsertLineBreaks')
+	    [System.Convert]::ToBase64String($data, 'InsertLineBreaks')
 	    '-----END PRIVATE KEY-----'
 	)
     $content | Out-File -FilePath $OutKeyPath -Encoding ascii

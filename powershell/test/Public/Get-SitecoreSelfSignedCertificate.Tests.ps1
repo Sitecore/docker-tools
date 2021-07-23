@@ -61,16 +61,16 @@
             It 'Generate self signed certificate with private key' {
                 $result.HasPrivateKey | Should -Be $true
             }
-    
+
             It 'Generate self signed certificate with proper subject' {
                 $result.Subject | Should -Match "CN=Sitecore-test, C=UA, O=Sitecore"
             }
-    
+
             It 'Generate self signed certificate with correct start date' {
                 $result.NotBefore.Date | Should -Match $startDate.Date
             }
-    
-            It 'Generate self signed certificate with correct end date' {    
+
+            It 'Generate self signed certificate with correct end date' {
                 $result.NotAfter.Date | Should -Match $endDate.Date
             }
         }
@@ -80,7 +80,7 @@
 
             $key = Create-RSAKey -KeyLength 4096
             Create-SelfSignedCertificate -Key $key
-            
+
             It 'Authority key identifier called' {
                 Assert-MockCalled New-AuthorityKeyIdentifier -Times 1 -Exactly
             }
@@ -116,7 +116,7 @@
 
                 $result = Create-SelfSignedCertificateWithSignature -Key $signedKey -RootCertificate $rootCert -CommonName "Sitecore-signed" -Country "UA" -Organization "Sitecore" -NotBefore $startDate -NotAfter $endDate
             }
-            
+
             It 'Generate self signed certificate with signature and private key' {
                 $result.HasPrivateKey | Should -Be $false
             }
@@ -141,12 +141,12 @@
             $result | Should -Be $true
         }
 
-        It 'Certificate file should not be empty' {  
+        It 'Certificate file should not be empty' {
             $outCertPath = "$TestDrive\localhost.crt"
             $key = Create-RSAKey -KeyLength 4096
             $certificate = Create-SelfSignedCertificate -Key $key
             Create-CertificateFile -Certificate $certificate -OutCertPath $outCertPath
-                    
+
             (Get-Item $outCertPath).Length | Should -Not -BeNullOrEmpty
         }
 
@@ -156,15 +156,15 @@
             $certificate = Create-SelfSignedCertificate -Key $key
             Create-CertificateFile -Certificate $certificate -OutCertPath $outCertPath
 
-            It 'Certificate file should not be empty' {         
+            It 'Certificate file should not be empty' {
                 (Get-Item $outCertPath).Length | Should -Not -BeNullOrEmpty
             }
 
-            It 'Certificate file should contain entry message' {          
+            It 'Certificate file should contain entry message' {
                 Get-Content $outCertPath | Should -Contain "-----BEGIN CERTIFICATE-----"
             }
-    
-            It 'Certificate file should contain end message' {        
+
+            It 'Certificate file should contain end message' {
                 Get-Content $outCertPath | Should -Contain "-----END CERTIFICATE-----"
             }
         }
@@ -175,8 +175,8 @@
             $key = Create-RSAKey -KeyLength 4096
             $certificate = Create-SelfSignedCertificate -Key $key
             Create-CertificateFile -Certificate $certificate -OutCertPath $TestDrive\localhost.crt
-            
-            It 'Authority key identifier called' {
+
+            It 'Write-Host called' {
                 Assert-MockCalled Write-Host -Times 1 -Exactly
             }
         }
@@ -192,14 +192,14 @@
             $key = Create-RSAKey -KeyLength 4096
             Create-KeyFile -Key $key -OutKeyPath $outKeyPath
 
-            It 'Key file should not be empty' {       
+            It 'Key file should not be empty' {
                 (Get-Item $outKeyPath).Length | Should -Not -BeNullOrEmpty
             }
-    
+
             It 'Key file should contain entry message' {
                 (Get-Content $outKeyPath) | Should -Contain "-----BEGIN PRIVATE KEY-----"
             }
-    
+
             It 'Key file should contain end message' {
                 (Get-Content $outKeyPath) | Should -Contain "-----END PRIVATE KEY-----"
             }
@@ -210,8 +210,8 @@
 
             $key = Create-RSAKey -KeyLength 4096
             Create-KeyFile -Key $key -OutKeyPath $TestDrive\localhost.key
-            
-            It 'Authority key identifier called' {
+
+            It 'Write-Host called' {
                 Assert-MockCalled Write-Host -Times 1 -Exactly
             }
         }
