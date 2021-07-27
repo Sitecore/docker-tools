@@ -22,45 +22,6 @@ class RSAKeyUtils
 		return (New-Object -TypeName AsnMessage -ArgumentList $privateKeyInfo.GetBytes(),"PKCS#8").GetBytes()
 	}
 
-	static [int] GetIntegerSize([System.IO.BinaryReader]$binr)
-	{
-		[byte]$bt = 0
-		[byte]$lowbyte = 0x00
-		[byte]$highbyte = 0x00
-		[int]$count = 0
-		$bt = $binr.ReadByte()
-		if ($bt -ne 0x02)
-		{
-			return 0
-        }
-		$bt = $binr.ReadByte()
-		if ($bt -eq 0x81)
-		{
-			$count = $binr.ReadByte()
-        }
-		elseif ($bt -eq 0x82)
-		{
-			$highbyte = $binr.ReadByte()
-			$lowbyte = $binr.ReadByte()
-			[byte[]]$modint = [byte[]]::CreateInstance([byte], 4)
-            $modint[0] = $lowbyte
-            $modint[1] = $highbyte
-            $modint[2] = 0x00
-            $modint[3] = 0x00
-			$count = [BitConverter]::ToInt32($modint,0)
-		}
-		else
-		{
-			$count = $bt
-		}
-		while ($binr.ReadByte() -eq 0x00)
-		{
-			$count = 1
-		}
-		$binr.BaseStream.Seek(-1,[System.IO.SeekOrigin]::Current)
-		return $count
-	}
-
 	static [AsnType] CreateOctetString([AsnType]$value)
 	{
 		if ([RSAKeyUtils]::IsEmpty($value))
@@ -337,7 +298,7 @@ class AsnType
 			return $this.Concatenate([byte[][]]@($this.Tag,$this.Octets))
 		}
         $val = [byte[][]]@($this.Tag,$this.Length,$this.Octets)
-		return $this.Concatenate([byte[][]]@($this.Tag,$this.Length,$this.Octets))
+		return $this.Concatenate($val)
 	}
 
 	[void] SetLength()
