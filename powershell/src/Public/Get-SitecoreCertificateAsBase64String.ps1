@@ -25,39 +25,27 @@ function Get-SitecoreCertificateAsBase64String
 
         [ValidateNotNullOrEmpty()]
         [string[]]
-        $DnsName = "localhost"
+        $DnsName = "localhost",
+
+        [Parameter()]
+        [ValidateSet(512, 1024, 2048, 4096)]
+        [int]
+        $KeyLength = 1024
     )
 
-    # Create the certificate
-    $params = @{
-        DnsName = $DnsName
-        NotAfter = (Get-Date).AddYears(5)
-    }
-    $cert = New-SelfSignedCertificate @params
+    $certRequest = [System.Security.Cryptography.X509Certificates.CertificateRequest]::new(
+        [X500DistinguishedName]::new("CN=$DnsName"), 
+        [System.Security.Cryptography.RSA]::Create($KeyLength), 
+        [System.Security.Cryptography.HashAlgorithmName]::SHA256, 
+        [System.Security.Cryptography.RSASignaturePadding]::Pkcs1)
 
-    Write-Verbose "Created temporary self-signed certificate $($cert.Thumbprint) for $DnsName"
+    $basicConstraints = [System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension]::new($false, $false, 0, $false)
+    $certRequest.CertificateExtensions.Add($basicConstraints)
+    $subjectKeyIdentifier = [System.Security.Cryptography.X509Certificates.X509SubjectKeyIdentifierExtension]::new($certRequest.PublicKey, $false)
+    $certRequest.CertificateExtensions.Add($subjectKeyIdentifier)
 
-    # Export to pfx
-    $pfxPath = Join-Path $Env:TEMP "sitecorecertificate.pfx"
-    $params = @{
-        Cert = $cert
-        FilePath = $pfxPath
-        Password = $Password
-        Force = $true
-    }
-    Export-PfxCertificate @params | Out-Null
-
-    Write-Verbose "Exported certificate to temporary pfx file $pfxPath"
-
-    # Get Base64 encoded form of the pfx
-    $encodedString = [System.Convert]::ToBase64String([System.IO.File]::ReadAllBytes((Get-Item $pfxPath)))
-
-    # Cleanup
-    $cert | Remove-Item
-    $pfxPath | Remove-Item
-
-    Write-Verbose "Temporary certificate and pfx file removed"
-
-    # Return Base64 encoded string
-    return $encodedString
+    $certificate = $certRequest.CreateSelfSigned([datetime]::Now, [datetime]::Now.AddYears(5))
+    $certificateBytes = $certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $Password)
+    
+    return [System.Convert]::ToBase64String($certificateBytes)
 }
