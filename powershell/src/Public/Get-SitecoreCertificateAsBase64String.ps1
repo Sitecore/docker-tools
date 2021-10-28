@@ -30,7 +30,7 @@ function Get-SitecoreCertificateAsBase64String
         [Parameter()]
         [ValidateSet(512, 1024, 2048, 4096)]
         [int]
-        $KeyLength = 1024
+        $KeyLength = 2048
     )
 
     $certRequest = [System.Security.Cryptography.X509Certificates.CertificateRequest]::new(
