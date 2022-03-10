@@ -25,12 +25,17 @@ function Get-SitecoreCertificateAsBase64String
 
         [ValidateNotNullOrEmpty()]
         [string[]]
-        $DnsName = "localhost"
+        $DnsName = "localhost",
+
+        [Parameter()]
+        [ValidateSet(512, 1024, 2048, 4096)]
+        [int]
+        $KeyLength = 2048
     )
 
     $certRequest = [System.Security.Cryptography.X509Certificates.CertificateRequest]::new(
         [X500DistinguishedName]::new("CN=$DnsName"), 
-        [System.Security.Cryptography.RSA]::Create(), 
+        [System.Security.Cryptography.RSA]::Create($KeyLength), 
         [System.Security.Cryptography.HashAlgorithmName]::SHA256, 
         [System.Security.Cryptography.RSASignaturePadding]::Pkcs1)
 
