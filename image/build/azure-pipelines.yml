@@ -24,13 +24,15 @@ resources:
 - repo: self
 
 variables:
-  sitecoreVersion: 10.1.0
+  sitecoreVersion: 10.3.0
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
-  osName: 1809
+  osName: ltsc2022
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
-  buildImage: mcr.microsoft.com/windows/servercore:ltsc2019
+  buildImage: mcr.microsoft.com/windows/servercore:ltsc2022
   buildNumber: $(Build.BuildID)
   REGISTRY_MAPPED: $(Registry)
+  USERNAME_MAPPED: $(Username)
+  PASSWORD_MAPPED: $(Password)
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
@@ -130,9 +132,11 @@ stages:
     - task: Docker@2
       displayName: Login to registry
       inputs:
-        containerRegistry: '$(RegistryServiceConnection)'
-        command: 'login'
-
+        targetType: 'inline'
+        script: |
+            Write-Information -MessageData "Logging into $(REGISTRY_MAPPED)" -InformationAction Continue
+            $(PASSWORD_MAPPED) | docker.exe login --username $(USERNAME_MAPPED) --password-stdin $(REGISTRY_MAPPED)
+            
     - task: DockerCompose@0
       displayName: Push image
       inputs:
