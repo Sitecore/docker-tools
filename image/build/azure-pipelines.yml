@@ -58,7 +58,7 @@ stages:
         script: |
         
           Write-Host "Logging into $(REGISTRY_MAPPED)..."
-          $(PASSWORD_MAPPED) | docker.exe login --username $(USERNAME_MAPPED) --password-stdin $(REGISTRY_MAPPED)
+          "$(PASSWORD_MAPPED)" | docker.exe login --username $(USERNAME_MAPPED) --password-stdin $(REGISTRY_MAPPED)
         
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
