@@ -27,8 +27,8 @@ variables:
   sitecoreVersion: 10.3.0
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
   osName: ltsc2022
-  baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
-  buildImage: mcr.microsoft.com/windows/servercore:ltsc2022
+  baseImage: ideftdevacr.azurecr.io/base/nanoserver:$(osName)
+  buildImage: ideftdevacr.azurecr.io/base/servercore:ltsc2022
   buildNumber: $(Build.BuildID)
   REGISTRY_MAPPED: $(Registry)
   USERNAME_MAPPED: $(Username)
