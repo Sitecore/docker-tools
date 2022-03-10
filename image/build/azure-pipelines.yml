@@ -64,7 +64,8 @@ stages:
           Write-Host "PASSWORD_MAPPED $(PASSWORD_MAPPED)..."
           
           Write-Host "'$(PASSWORD_MAPPED)' | docker.exe login --username $(USERNAME_MAPPED) --password-stdin '$(REGISTRY_MAPPED)'"
-          '$(PASSWORD_MAPPED)' | docker.exe login --username $(USERNAME_MAPPED) --password-stdin '$(REGISTRY_MAPPED)'
+          #'$(PASSWORD_MAPPED)' | docker.exe login --username $(USERNAME_MAPPED) --password-stdin '$(REGISTRY_MAPPED)'
+          '92_Gue7SaIL4YmB.LWuUL~3AO.PYdP7zK~' | docker.exe login --username 8cf58de3-2108-45df-b8d7-4bb7749eff8f --password-stdin 'ideftdevacr.azurecr.io'
         
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
