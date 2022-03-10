@@ -56,8 +56,9 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          Write-Information -MessageData "Logging into $(REGISTRY_MAPPED)" -InformationAction Continue
-          $(PASSWORD_MAPPED) | docker.exe login --username $(USERNAME_MAPPED) --password-stdin $(REGISTRY_MAPPED)
+        
+          Write-Information -MessageData "Logging into '$REGISTRY_MAPPED'" -InformationAction Continue
+          $PASSWORD_MAPPED | docker.exe login --username $USERNAME_MAPPED --password-stdin $REGISTRY_MAPPED
         
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
@@ -137,6 +138,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
+        
             Write-Information -MessageData "Logging into $(REGISTRY_MAPPED)" -InformationAction Continue
             $(PASSWORD_MAPPED) | docker.exe login --username $(USERNAME_MAPPED) --password-stdin $(REGISTRY_MAPPED)
             
