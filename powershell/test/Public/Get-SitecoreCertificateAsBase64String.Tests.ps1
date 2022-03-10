@@ -50,5 +50,15 @@
             $dnsName = getDnsName $cert
             $dnsName | Should -Be "test.com"
         }
+
+        It 'should not throw with default key length' {
+            $password = ConvertTo-SecureString -String "Test123" -Force -AsPlainText
+            { Get-SitecoreCertificateAsBase64String -DnsName "test.com" -Password $password } | Should -Not -Throw
+        }
+
+        It 'wrong rsa key length fails validation' {
+            $password = ConvertTo-SecureString -String "Test123" -Force -AsPlainText
+            { Get-SitecoreCertificateAsBase64String -DnsName "test.com" -Password $password -KeyLength 2000} | Should -Throw
+        }
     }
 }
