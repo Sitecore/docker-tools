@@ -31,8 +31,8 @@ variables:
   buildImage: ideftdevacr.azurecr.io/base/servercore:ltsc2022
   buildNumber: $(Build.BuildID)
   REGISTRY_MAPPED: 'ideftdevacr.azurecr.io'
-  USERNAME_MAPPED: '8cf58de3-2108-45df-b8d7-4bb7749eff8f'
-  PASSWORD_MAPPED: '92_Gue7SaIL4YmB.LWuUL~3AO.PYdP7zK~'
+  USERNAME_MAPPED: "8cf58de3-2108-45df-b8d7-4bb7749eff8f"
+  PASSWORD_MAPPED: "92_Gue7SaIL4YmB.LWuUL~3AO.PYdP7zK~"
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
@@ -58,7 +58,13 @@ stages:
         script: |
         
           Write-Host "Logging into $(REGISTRY_MAPPED)..."
-          "$(PASSWORD_MAPPED)" | docker.exe login --username $(USERNAME_MAPPED) --password-stdin $(REGISTRY_MAPPED)
+          
+          Write-Host "REGISTRY_MAPPED $(REGISTRY_MAPPED)..."
+          Write-Host "USERNAME_MAPPED $(USERNAME_MAPPED)..."
+          Write-Host "PASSWORD_MAPPED $(PASSWORD_MAPPED)..."
+          
+          Write-Host "'$(PASSWORD_MAPPED)' | docker.exe login --username $(USERNAME_MAPPED) --password-stdin '$(REGISTRY_MAPPED)'"
+          '$(PASSWORD_MAPPED)' | docker.exe login --username $(USERNAME_MAPPED) --password-stdin '$(REGISTRY_MAPPED)'
         
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
