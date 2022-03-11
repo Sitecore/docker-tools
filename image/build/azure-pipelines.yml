@@ -59,9 +59,10 @@ stages:
           Write-Host "buildNumberVar: '$buildNumberVar'"
           
           Write-Host "var1: $env:REGISTRY_SERVICE_CONNECTION_MAPPED"
+          Write-Host "var2: $(REGISTRY_SERVICE_CONNECTION_MAPPED)"
          
-          Write-Host "var2: $env:REGISTRY_MAPPED"
-          Write-Host "var3: ${env:REGISTRY_MAPPED}.Value"
+          Write-Host "var3: $env:REGISTRY_MAPPED"
+          Write-Host "var4: $(REGISTRY_MAPPED)"
 
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
