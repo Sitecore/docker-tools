@@ -32,6 +32,8 @@ variables:
   buildNumber: $(Build.BuildID)
   REGISTRY_MAPPED: $(Registry)
   REGISTRY_SERVICE_CONNECTION_MAPPED: $(RegistryServiceConnection)
+  PASSWORD_MAPPED: $(Password)
+  USERNAME_MAPPED: $(Username)
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
@@ -55,14 +57,14 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          [string] $buildNumberVar = "$(buildNumber)"
-          Write-Host "buildNumberVar: '$buildNumberVar'"
+          Write-Host "Logging into $(REGISTRY_SERVICE_CONNECTION_MAPPED) registry..."
           
           Write-Host "var1: $env:REGISTRY_SERVICE_CONNECTION_MAPPED"
           Write-Host "var2: $(REGISTRY_SERVICE_CONNECTION_MAPPED)"
-         
           Write-Host "var3: $env:REGISTRY_MAPPED"
-          Write-Host "var4: $(REGISTRY_MAPPED)"
+          
+          Write-Host "$env:PASSWORD_MAPPED | docker.exe login --username $env:USERNAME_MAPPED --password-stdin $env:REGISTRY_MAPPED"
+          "$env:PASSWORD_MAPPED" | docker.exe login --username $env:USERNAME_MAPPED --password-stdin "$env:REGISTRY_MAPPED"
 
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
