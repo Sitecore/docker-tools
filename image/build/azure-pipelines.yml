@@ -53,13 +53,17 @@ stages:
       displayName: Generate tags
       inputs:
         targetType: 'inline'
+        regisrty: '$(REGISTRY_MAPPED)'
         script: |
           [string] $buildNumberVar = "$(buildNumber)"
           Write-Host "buildNumberVar: '$buildNumberVar'"
+          
+          [string] $regisrtyVar = "$(regisrty)"
+          Write-Host "regisrtyVar: '$regisrtyVar'"
 
           
           Write-Host "var0: $env:REGISTRY_MAPPED"
-          Write-Host "var2: ${env:REGISTRY_MAPPED}"
+          Write-Host "var2: ${env:REGISTRY_MAPPED}.Value"
           
           Write-Host "var3: $env:Registry"
           Write-Host "var4: ${env:Registry}"
