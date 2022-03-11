@@ -31,6 +31,7 @@ variables:
   buildImage: ideftdevacr.azurecr.io/base/servercore:ltsc2022
   buildNumber: $(Build.BuildID)
   REGISTRY_MAPPED: $(Registry)
+  REGISTRY_SERVICE_CONNECTION_MAPPED: $(RegistryServiceConnection)
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
@@ -53,20 +54,14 @@ stages:
       displayName: Generate tags
       inputs:
         targetType: 'inline'
-        regisrty: '$(REGISTRY_MAPPED)'
         script: |
           [string] $buildNumberVar = "$(buildNumber)"
           Write-Host "buildNumberVar: '$buildNumberVar'"
           
-          [string] $regisrtyVar = "$(regisrty)"
-          Write-Host "regisrtyVar: '$regisrtyVar'"
-
-          
-          Write-Host "var0: $env:REGISTRY_MAPPED"
-          Write-Host "var2: ${env:REGISTRY_MAPPED}.Value"
-          
-          Write-Host "var3: $env:Registry"
-          Write-Host "var4: ${env:Registry}"
+          Write-Host "var1: $env:REGISTRY_SERVICE_CONNECTION_MAPPED"
+         
+          Write-Host "var2: $env:REGISTRY_MAPPED"
+          Write-Host "var3: ${env:REGISTRY_MAPPED}.Value"
 
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
