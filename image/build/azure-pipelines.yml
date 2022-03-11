@@ -55,7 +55,6 @@ stages:
         targetType: 'inline'
         script: |
           Write-Host "var0: $env:REGISTRY_MAPPED"
-          Write-Host "var1: ${{ variables.REGISTRY_MAPPED }}"
           Write-Host "var2: ${env:REGISTRY_MAPPED}"
           Write-Host "var3: $REGISTRY_MAPPED"
           Write-Host "var4: variables['REGISTRY_MAPPED']"
