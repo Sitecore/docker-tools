@@ -59,6 +59,7 @@ stages:
         script: |
           Write-Host "Logging into $(REGISTRY_SERVICE_CONNECTION_MAPPED) registry..."
           
+          Write-Host "registry: ${env:REGISTRY}"
           Write-Host "var1: $env:REGISTRY_SERVICE_CONNECTION_MAPPED"
           Write-Host "var2: $(REGISTRY_SERVICE_CONNECTION_MAPPED)"
           Write-Host "var3: $env:REGISTRY_MAPPED"
