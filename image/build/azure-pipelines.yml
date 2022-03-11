@@ -54,10 +54,14 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
+          [string] $buildNumberVar = "$(buildNumber)"
+          [string] $registryMappedVar = "$(REGISTRY_MAPPED)"
+          Write-Host "buildNumberVar: '$buildNumberVar'; registryMappedVar: '$registryMappedVar'"
+          [string] $registry = $registryMappedVar
+          Write-Host "registry: '$registry'"
+          
           Write-Host "var0: $env:REGISTRY_MAPPED"
           Write-Host "var2: ${env:REGISTRY_MAPPED}"
-          Write-Host "var3: $REGISTRY_MAPPED"
-          Write-Host "var4: variables['REGISTRY_MAPPED']"
 
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
