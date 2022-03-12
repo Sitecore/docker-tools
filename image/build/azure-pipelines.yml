@@ -64,8 +64,8 @@ stages:
           Write-Host "var2: $(REGISTRY_SERVICE_CONNECTION_MAPPED)"
           Write-Host "var3: $env:REGISTRY_MAPPED"
           
-          Write-Host "$env:PASSWORD_MAPPED | docker.exe login --username $env:USERNAME_MAPPED --password-stdin $env:REGISTRY_MAPPED"
-          "$env:PASSWORD_MAPPED" | docker.exe login --username $env:USERNAME_MAPPED --password-stdin "$env:REGISTRY_MAPPED"
+          Write-Host "${env:Password} | docker.exe login --username ${env:Username} --password-stdin ${env:REGISTRY}"
+          "${env:Password}" | docker.exe login --username ${env:Username} --password-stdin "${env:REGISTRY}"
 
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
