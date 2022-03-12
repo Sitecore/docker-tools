@@ -66,8 +66,8 @@ stages:
           Write-Host $env:AcrClient
           Write-Host $env:REGISTRY
           
-          Write-Host " | docker.exe login --username ${env:AcrClient} --password-stdin ${env:REGISTRY}"
-          $env:AcrSecret | docker.exe login --username $env:AcrClient --password-stdin $env:REGISTRY
+          Write-Host " | docker.exe login --username $env:AcrClient --password-stdin $env:REGISTRY"
+          $env:AcrSecret | docker.exe login $env:REGISTRY --username $env:AcrClient --password-stdin
 
           Write-Host "Pulling base image $(baseImage)..."
           docker pull $(baseImage)
