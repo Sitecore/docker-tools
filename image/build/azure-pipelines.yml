@@ -30,10 +30,10 @@ variables:
   baseImage: ideftdevacr.azurecr.io/base/nanoserver:$(osName)
   buildImage: ideftdevacr.azurecr.io/base/servercore:ltsc2022
   buildNumber: $(Build.BuildID)
-  REGISTRY_MAPPED: $(Registry)
+  REGISTRY_MAPPED: ${env:REGISTRY}
   REGISTRY_SERVICE_CONNECTION_MAPPED: $(RegistryServiceConnection)
-  PASSWORD_MAPPED: $(Password)
-  USERNAME_MAPPED: $(Username)
+  PASSWORD_MAPPED: ${env:Password}
+  USERNAME_MAPPED: ${env:Username}
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
