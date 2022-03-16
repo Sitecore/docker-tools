@@ -51,23 +51,32 @@ stages:
   jobs:
   - job: Tagging
     steps:
-
-    - task: PowerShell@2
-      displayName: "Generate tags"
+    
+   - task: Docker@2
+      displayName: Login to the ACR registry
       inputs:
-        targetType: filePath
-        filePath: "$(workingDirectory)/Tagging-BaseImage.ps1"
-        arguments: >
-          -AzureContainerRegistry "$(REGISTRY_MAPPED)"
-          -Username "$(USERNAME_MAPPED)"
-          -Password "$(PASSWORD_MAPPED)"
-          -BaseImage "$(baseImage)"
-          -SitecoreVersion "$(sitecoreVersion)"
-          -Revision "$(revision)"
-          -BuildNumber "$(buildNumber)"
-          -OsName "$(osName)"
-          -Stability "$(stability)"
+        containerRegistry: '$(RegistryServiceConnection)'
+        command: 'login'
         
+   - task: PowerShell@2
+      name: Tags
+      displayName: Generate tags
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Pulling base image $(baseImage)..."
+          docker pull $(baseImage)
+
+          [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
+          Write-Host "Image OS version is '$osVersion'"
+
+          [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
+          [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
+          Write-Host "Setting long tag to '$longTag'"
+          Write-Host "Setting short tag to '$shortTag'"
+          Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
+          Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
+          
 - stage: Build
   dependsOn: Versioning
 
