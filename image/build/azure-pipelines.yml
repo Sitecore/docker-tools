@@ -26,7 +26,7 @@ resources:
 variables:
   sitecoreVersion: 10.3.0
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
-  osName: ltsc2019
+  osName: 1809
   baseImage: ideftdevacr.azurecr.io/base/nanoserver:$(osName)
   buildImage: ideftdevacr.azurecr.io/base/servercore:ltsc2019
   buildNumber: $(Build.BuildID)
