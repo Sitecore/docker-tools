@@ -67,8 +67,6 @@ stages:
           -BuildNumber "$(buildNumber)"
           -OsName "$(osName)"
           -Stability "$(stability)"
-        pwsh: true
-        timeoutInMinutes: 10
         
 - stage: Build
   dependsOn: Versioning
