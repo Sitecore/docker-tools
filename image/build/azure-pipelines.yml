@@ -34,7 +34,7 @@ variables:
   REGISTRY_SERVICE_CONNECTION_MAPPED: $(RegistryServiceConnection)
   PASSWORD_MAPPED: $(Password)
   USERNAME_MAPPED: $(Username)
-  workingDirectory:'$(Build.SourcesDirectory)/image/build'
+  workingDirectory: '$(Build.SourcesDirectory)/image/build'
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
