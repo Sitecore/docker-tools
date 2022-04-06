@@ -42,7 +42,7 @@ variables:
     stability: '-unstable'
     namespace: 'experimental'
 
-pool: Default_ltsc2019
+pool: Default
 
 stages:
 
