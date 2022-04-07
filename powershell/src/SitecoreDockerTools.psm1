@@ -1,6 +1,6 @@
 Set-StrictMode -Version Latest
 
-# Requires -RunAsAdministrator
+#Requires -RunAsAdministrator
 
 # Get Functions
 $private = @(Get-ChildItem -Path (Join-Path $PSScriptRoot Private) -Include *.ps1 -File -Recurse)
