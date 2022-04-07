@@ -48,14 +48,10 @@ stages:
         targetType: 'inline'
         script: |
           if ("$(prerelease)") {
-            Write-Host "ModuleVersion: $(moduleVer), Prerelease: $(prerelease)"
-            Start-Process powershell -ArgumentList 'Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer) -Prerelease $(prerelease)' -Verb RunAs
-            #Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer) -Prerelease $(prerelease)
+            Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer) -Prerelease $(prerelease)
             Write-Host "Updated module manifest. ModuleVersion: $(moduleVer), Prerelease: $(prerelease)"
           } else {
-            Write-Host "ModuleVersion: $(moduleVer)"
-            Start-Process powershell -ArgumentList 'Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer)' -Verb RunAs
-            #Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer)
+            Update-ModuleManifest -Path .\SitecoreDockerTools.psd1 -ModuleVersion $(moduleVer)
             Write-Host "Updated module manifest. ModuleVersion: $(moduleVer)"
           }
         failOnStderr: true
