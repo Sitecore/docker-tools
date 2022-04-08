@@ -41,10 +41,6 @@ stages:
   jobs:
   - job: Build
   
-  pool:
-    name: "Default"
-    demands:
-      - ltsc2022
     steps:
 
     - task: PowerShell@2
