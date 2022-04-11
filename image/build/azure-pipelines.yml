@@ -30,6 +30,7 @@ variables:
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
   buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
+  REGISTRY_MAPPED: $(ACR_ContainerRegistry)
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
@@ -80,12 +81,26 @@ stages:
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
+      azureContainerRegistry: ideftdevacr.azurecr.io
+      azureSubscriptionEndpoint: AKSServiceConnections
     steps:
-        
-    - task: CmdLine@2
+    
+    - task: DockerCompose@0
       displayName: Build image
       inputs:
-        script: Powershell.exe "$(Build.SourcesDirectory)\image\build\BuildImage.ps1" "-ContainerRegistry $(ACR_ContainerRegistry) -Username $(ACR_UserName) -Password $(ACR_Password) -Project '$(namespace)' -Tag '$(longTag)' -BaseImage '$(baseImage)' -BuildImage '$(buildImage)'"
+        containerregistrytype: Azure Container Registry
+        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+        azureContainerRegistry: $(azureContainerRegistry)
+        dockerComposeFile: '**/docker-compose.yml'
+        dockerComposeFileArgs: |
+          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
+          VERSION=$(longTag)
+          BASE_IMAGE=$(baseImage)
+          BUILD_IMAGE=$(buildImage)
+        action: 'Build services' 
+        additionalImageTags: '$(shortTag)' 
+        arguments: '--force-rm'
+        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
 
 - stage: Test
   dependsOn: Build
