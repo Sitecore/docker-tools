@@ -85,7 +85,7 @@ stages:
     - task: CmdLine@2
       displayName: Build image
       inputs:
-        script: Powershell.exe "$(Build.SourcesDirectory)\image\src\BuildImage.ps1" "-ContainerRegistry '$(ACR_ContainerRegistry)' -Username '$(ACR_UserName)' -Password '$(ACR_Password)' -Project '$(namespace)' -Tag '$(longTag)' -BaseImage '$(baseImage)' -BuildImage '$(buildImage)'"
+        script: Powershell.exe "$(Build.SourcesDirectory)\image\build\BuildImage.ps1" "-ContainerRegistry '$(ACR_ContainerRegistry)' -Username '$(ACR_UserName)' -Password '$(ACR_Password)' -Project '$(namespace)' -Tag '$(longTag)' -BaseImage '$(baseImage)' -BuildImage '$(buildImage)'"
 
 - stage: Test
   dependsOn: Build
@@ -129,4 +129,4 @@ stages:
     - task: CmdLine@2
       displayName: Push image
       inputs:
-        script: Powershell.exe "$(Build.SourcesDirectory)\image\src\PushImage.ps1" "-ContainerRegistry '$(ACR_ContainerRegistry)' -Username '$(ACR_UserName)' -Password '$(ACR_Password)' -Project '$(namespace)' -Tag '$(longTag)' -BaseImage '$(baseImage)' -BuildImage '$(buildImage)'"
+        script: Powershell.exe "$(Build.SourcesDirectory)\image\build\PushImage.ps1" "-ContainerRegistry '$(ACR_ContainerRegistry)' -Username '$(ACR_UserName)' -Password '$(ACR_Password)' -Project '$(namespace)' -Tag '$(longTag)' -BaseImage '$(baseImage)' -BuildImage '$(buildImage)'"
