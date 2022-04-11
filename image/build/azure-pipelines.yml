@@ -50,12 +50,6 @@ stages:
   - job: Tagging
     steps:
     
-    - task: DockerCompose@0
-      displayName: ACR registry login
-      inputs:
-        containerregistrytype: Azure Container Registry
-        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
-        azureContainerRegistry: $(azureContainerRegistry)
     - task: PowerShell@2
       name: Tags
       displayName: Generate tags
@@ -87,7 +81,7 @@ stages:
     steps:
     
     - task: DockerCompose@0
-      displayName: Build image
+      displayName: Building image
       inputs:
         containerregistrytype: Azure Container Registry
         azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
@@ -98,34 +92,14 @@ stages:
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
-        action: 'Build services' 
+        action: Build services
         additionalImageTags: '$(shortTag)' 
         arguments: '--force-rm'
         currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
-
-- stage: Test
-  dependsOn: Build
-
-  jobs:
-  - job: Pester
-    displayName: Run Pester tests
-    steps:
-
-    - task: Pester@9
-      inputs:
-        scriptFolder: "$(Build.SourcesDirectory)/image/test/*"
-        resultsFile: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
-        usePSCore: False
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: "NUnit"
-        testResultsFiles: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
-        failTaskOnFailedTests: true
-
+        
 - stage: Push
   dependsOn:
   - Versioning
-  - Test
   condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
@@ -136,13 +110,18 @@ stages:
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
     steps:
 
-    - task: Docker@2
-      displayName: Login to registry
+    - task: DockerCompose@0
+      displayName: Pushing image
       inputs:
-        containerRegistry: '$(RegistryServiceConnection)'
-        command: 'login'
-        
-    - task: CmdLine@2
-      displayName: Push image
-      inputs:
-        script: Powershell.exe "$(Build.SourcesDirectory)\image\build\PushImage.ps1" "-ContainerRegistry $(ACR_ContainerRegistry) -Username $(ACR_UserName) -Password $(ACR_Password) -Project '$(namespace)' -Tag '$(longTag)' -BaseImage '$(baseImage)' -BuildImage '$(buildImage)'"
+        containerregistrytype: Azure Container Registry
+        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+        azureContainerRegistry: $(azureContainerRegistry)
+        dockerComposeFile: '**/docker-compose.yml'
+        dockerComposeFileArgs: |
+          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
+          VERSION=$(longTag)
+          BASE_IMAGE=$(baseImage)
+          BUILD_IMAGE=$(buildImage)
+        action: Push services
+        additionalImageTags: '$(shortTag)'
+        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
