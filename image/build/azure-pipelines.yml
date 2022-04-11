@@ -30,11 +30,6 @@ variables:
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
   buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
-  REGISTRY_MAPPED: $(Registry)
-  REGISTRY_SERVICE_CONNECTION_MAPPED: $(RegistryServiceConnection)
-  PASSWORD_MAPPED: $(Password)
-  USERNAME_MAPPED: $(Username)
-  workingDirectory: '$(Build.SourcesDirectory)/image/build'
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
@@ -56,7 +51,7 @@ stages:
       displayName: Login to ACR
       inputs:
         command: 'login'
-        containerRegistry: '$(RegistryServiceConnection)'    
+        containerRegistry: '$(RegistryServiceConnection)'
     - task: PowerShell@2
       name: Tags
       displayName: Generate tags
@@ -86,22 +81,11 @@ stages:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
     steps:
-
-    - task: DockerCompose@0
+        
+    - task: CmdLine@2
       displayName: Build image
       inputs:
-        containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: '$(RegistryServiceConnection)'
-        dockerComposeFile: '**/docker-compose.yml'
-        dockerComposeFileArgs: |
-          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
-          VERSION=$(longTag)
-          BASE_IMAGE=$(baseImage)
-          BUILD_IMAGE=$(buildImage)
-        action: 'Build services'
-        additionalImageTags: '$(shortTag)'
-        arguments: '--force-rm'
-        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+        script: Powershell.exe "$(Build.SourcesDirectory)\image\src\BuildImage.ps1" "-ContainerRegistry '$(ACR_ContainerRegistry)' -Username '$(ACR_UserName)' -Password '$(ACR_Password)' -Project '$(namespace)' -Tag '$(longTag)' -BaseImage '$(baseImage)' -BuildImage '$(buildImage)'"
 
 - stage: Test
   dependsOn: Build
@@ -141,18 +125,8 @@ stages:
       inputs:
         containerRegistry: '$(RegistryServiceConnection)'
         command: 'login'
-
-    - task: DockerCompose@0
+        
+    - task: CmdLine@2
       displayName: Push image
       inputs:
-        containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: '$(RegistryServiceConnection)'
-        dockerComposeFile: '**/docker-compose.yml'
-        dockerComposeFileArgs: |
-          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
-          VERSION=$(longTag)
-          BASE_IMAGE=$(baseImage)
-          BUILD_IMAGE=$(buildImage)
-        action: 'Push services'
-        additionalImageTags: '$(shortTag)'
-        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+        script: Powershell.exe "$(Build.SourcesDirectory)\image\src\PushImage.ps1" "-ContainerRegistry '$(ACR_ContainerRegistry)' -Username '$(ACR_UserName)' -Password '$(ACR_Password)' -Project '$(namespace)' -Tag '$(longTag)' -BaseImage '$(baseImage)' -BuildImage '$(buildImage)'"
