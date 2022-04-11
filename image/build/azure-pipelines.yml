@@ -30,8 +30,7 @@ variables:
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
   buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
-  REGISTRY_MAPPED: $(ACR_ContainerRegistry)
-  azureContainerRegistry: ideftdevacr.azurecr.io
+  azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
@@ -88,7 +87,7 @@ stages:
         azureContainerRegistry: $(azureContainerRegistry)
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
+          REGISTRY=$(azureContainerRegistry)/$(namespace)/
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
@@ -96,10 +95,30 @@ stages:
         additionalImageTags: '$(shortTag)' 
         arguments: '--force-rm'
         currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+
+- stage: Test
+  dependsOn: Build
+
+  jobs:
+  - job: Pester
+    displayName: Run Pester tests
+    steps:
+
+    - task: Pester@9
+      inputs:
+        scriptFolder: "$(Build.SourcesDirectory)/image/test/*"
+        resultsFile: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
+        usePSCore: False
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: "NUnit"
+        testResultsFiles: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
+        failTaskOnFailedTests: true
         
 - stage: Push
   dependsOn:
   - Versioning
+  - Test
   condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
@@ -118,7 +137,7 @@ stages:
         azureContainerRegistry: $(azureContainerRegistry)
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
+          REGISTRY=$(azureContainerRegistry)/$(namespace)/
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
