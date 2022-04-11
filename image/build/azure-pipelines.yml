@@ -31,6 +31,8 @@ variables:
   buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
   REGISTRY_MAPPED: $(ACR_ContainerRegistry)
+  azureContainerRegistry: ideftdevacr.azurecr.io
+  azureSubscriptionEndpoint: AKSServiceConnections
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
@@ -81,8 +83,6 @@ stages:
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
-      azureContainerRegistry: ideftdevacr.azurecr.io
-      azureSubscriptionEndpoint: AKSServiceConnections
     steps:
     
     - task: DockerCompose@0
