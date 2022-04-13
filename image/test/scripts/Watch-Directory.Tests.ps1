@@ -62,7 +62,7 @@ Describe 'Watch-Directory.ps1' {
         New-Item -Path "$($src)\file.txt" -ItemType 'File'
         New-Item -Path "$($dst)\file.txt" -ItemType 'File'
 
-        $job = Start-Job -ScriptBlock { Start-Sleep -Milliseconds 500; Remove-Item -Path "$($args[0])\file.txt" } -ArgumentList $src
+        $job = Start-Job -ScriptBlock { Start-Sleep -Milliseconds 500; Remove-Item -Path "$($args[0])\file.txt" -Recurse } -ArgumentList $src
         & $script -Path $src -Destination $dst -Timeout 1000 -Sleep 100
         $job | Wait-Job | Remove-Job
 
