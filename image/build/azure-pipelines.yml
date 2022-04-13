@@ -24,13 +24,14 @@ resources:
 - repo: self
 
 variables:
-  sitecoreVersion: 10.2.0
+  sitecoreVersion: 10.3.0
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
-  osName: 1809
+  osName: ltsc2022
   baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
-  buildImage: mcr.microsoft.com/windows/servercore:ltsc2019
+  buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
-  REGISTRY_MAPPED: $(Registry)
+  azureContainerRegistry: $(ACR_ContainerRegistry)
+  azureSubscriptionEndpoint: AKSServiceConnections
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
@@ -47,26 +48,26 @@ stages:
   jobs:
   - job: Tagging
     steps:
-
+    
     - task: PowerShell@2
       name: Tags
       displayName: Generate tags
       inputs:
         targetType: 'inline'
         script: |
-          Write-Host "Pulling base image $(baseImage)..."
-          docker pull $(baseImage)
+            Write-Host "Pulling base image $(baseImage)..."
+            docker pull $(baseImage)
 
-          [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
-          Write-Host "Image OS version is '$osVersion'"
+            [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
+            Write-Host "Image OS version is '$osVersion'"
 
-          [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
-          [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
-          Write-Host "Setting long tag to '$longTag'"
-          Write-Host "Setting short tag to '$shortTag'"
-          Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
-          Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
-
+            [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
+            [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
+            Write-Host "Setting long tag to '$longTag'"
+            Write-Host "Setting short tag to '$shortTag'"
+            Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
+            Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
+            
 - stage: Build
   dependsOn: Versioning
 
@@ -77,19 +78,20 @@ stages:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
     steps:
-
+    
     - task: DockerCompose@0
-      displayName: Build image
+      displayName: Building image
       inputs:
-        containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: '$(RegistryServiceConnection)'
+        containerregistrytype: Azure Container Registry
+        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+        azureContainerRegistry: $(azureContainerRegistry)
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
+          REGISTRY=$(azureContainerRegistry)/$(namespace)/
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
-        action: 'Build services'
+        action: Build services
         additionalImageTags: '$(shortTag)'
         arguments: '--force-rm'
         currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
@@ -112,7 +114,7 @@ stages:
         testResultsFormat: "NUnit"
         testResultsFiles: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
         failTaskOnFailedTests: true
-
+        
 - stage: Push
   dependsOn:
   - Versioning
@@ -127,23 +129,18 @@ stages:
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
     steps:
 
-    - task: Docker@2
-      displayName: Login to registry
-      inputs:
-        containerRegistry: '$(RegistryServiceConnection)'
-        command: 'login'
-
     - task: DockerCompose@0
-      displayName: Push image
+      displayName: Pushing image
       inputs:
-        containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: '$(RegistryServiceConnection)'
+        containerregistrytype: Azure Container Registry
+        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+        azureContainerRegistry: $(azureContainerRegistry)
         dockerComposeFile: '**/docker-compose.yml'
         dockerComposeFileArgs: |
-          REGISTRY=$(REGISTRY_MAPPED)/$(namespace)/
+          REGISTRY=$(azureContainerRegistry)/$(namespace)/
           VERSION=$(longTag)
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
-        action: 'Push services'
+        action: Push services
         additionalImageTags: '$(shortTag)'
         currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
