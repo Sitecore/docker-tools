@@ -55,19 +55,19 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          Write-Host "Pulling base image $(baseImage)..."
-          docker pull $(baseImage)
+            Write-Host "Pulling base image $(baseImage)..."
+            docker pull $(baseImage)
 
-          [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
-          Write-Host "Image OS version is '$osVersion'"
+            [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
+            Write-Host "Image OS version is '$osVersion'"
 
-          [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
-          [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
-          Write-Host "Setting long tag to '$longTag'"
-          Write-Host "Setting short tag to '$shortTag'"
-          Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
-          Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
-          
+            [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
+            [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
+            Write-Host "Setting long tag to '$longTag'"
+            Write-Host "Setting short tag to '$shortTag'"
+            Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
+            Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
+            
 - stage: Build
   dependsOn: Versioning
 
@@ -92,7 +92,7 @@ stages:
           BASE_IMAGE=$(baseImage)
           BUILD_IMAGE=$(buildImage)
         action: Build services
-        additionalImageTags: '$(shortTag)' 
+        additionalImageTags: '$(shortTag)'
         arguments: '--force-rm'
         currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
 

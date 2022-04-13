@@ -45,7 +45,7 @@ Describe 'Watch-Directory.ps1' {
         "$($dst)\file.txt" | Should -Exist
     }
 
-    <#It 'copies new files' {
+    It 'copies new files' {
         $src = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
         $dst = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
 
@@ -67,7 +67,7 @@ Describe 'Watch-Directory.ps1' {
         $job | Wait-Job | Remove-Job
 
         "$($dst)\file.txt" | Should -Not -Exist
-    }#>
+    }
 
     It 'ignores excluded files on copy' {
         $src = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
