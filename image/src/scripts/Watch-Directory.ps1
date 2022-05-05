@@ -19,6 +19,8 @@
     Default directories to skip during sync. Default is "obj", "Properties", "node_modules".
 .PARAMETER ExcludeDirectories
     Additional directories to skip during sync.
+.PARAMETER Executable
+    The executable to start and restart after files are synced
 .EXAMPLE
     PS C:\> .\Watch-Directory.ps1 -Path 'C:\source' -Destination 'C:\destination' -ExcludeFiles @("web.config")
 .INPUTS
@@ -52,7 +54,10 @@ param(
     [array]$DefaultExcludedDirectories = @("obj", "Properties", "node_modules"),
 
     [Parameter(Mandatory = $false)]
-    [array]$ExcludeDirectories = @()
+    [array]$ExcludeDirectories = @(),
+
+    [Parameter(Mandatory = $false)]
+    [string]$Executable = ""
 )
 
 # Setup
@@ -119,6 +124,14 @@ Register-ObjectEvent $watcher Deleted -SourceIdentifier "FileDeleted" -MessageDa
     }
 } | Out-Null
 
+function StartExecutable()
+{
+    Write-Information "$(Get-Date -Format $timeFormat): Starting executable '$Executable'."
+    $process = (Start-Process $Executable -PassThru)
+    Write-Information "$(Get-Date -Format $timeFormat): Succesfully started process with Id $($process.Id)"
+    return $process
+}
+
 function Sync
 {
     param(
@@ -129,10 +142,17 @@ function Sync
         [Parameter(Mandatory = $false)]
         $ExcludeFiles,
         [Parameter(Mandatory = $false)]
-        $ExcludeDirectories
+        $ExcludeDirectories,
+        [Parameter(Mandatory = $false)]
+        $ListOnly
     )
 
     $command = @("robocopy", "`"$Path`"", "`"$Destination`"", "/E", "/XX", "/MT:1", "/NJH", "/NJS", "/FP", "/NDL", "/NP", "/NS", "/R:5", "/W:1")
+
+    if($ListOnly)
+    {
+        $command += "/L "
+    }
 
     if ($ExcludeDirectories.Count -gt 0)
     {
@@ -164,27 +184,60 @@ function Sync
         $line = $_.Trim().Replace("`r`n", "").Replace("`t", " ")
         $dirty = ![string]::IsNullOrEmpty($line)
 
-        if ($dirty)
+        if ($dirty -and $ListOnly -eq $false)
         {
             Write-Information "$(Get-Date -Format $timeFormat): $line"
         }
     }
 
-    if ($dirty)
+    if ($dirty -and $ListOnly -eq $false)
     {
         Write-Information "$(Get-Date -Format $timeFormat): Done syncing..."
     }
+
+    return $dirty
 }
 
 try
 {
+    $process = $null
+    if($Executable)
+    {
+        $process = StartExecutable
+    }
+
     Write-Information "$(Get-Date -Format $timeFormat): Watching '$Path' for changes, will copy to '$Destination'..."
 
     # Main loop
     $timer = [System.Diagnostics.Stopwatch]::StartNew()
     while ($Timeout -eq 0 -or $timer.ElapsedMilliseconds -lt $Timeout)
     {
-        Sync -Path $Path -Destination $Destination -ExcludeFiles $fileRules -ExcludeDirectories $directoryRules
+        $filesChanged = Sync -Path $Path -Destination $Destination -ExcludeFiles $fileRules -ExcludeDirectories $directoryRules -ListOnly $true
+
+        if($filesChanged)
+        {
+            Write-Information "$(Get-Date -Format $timeFormat): File changes have been detected"
+
+            if($process)
+            {
+                $process.Refresh()
+                if($process.HasExited -eq $false)
+                {
+                    Write-Information "$(Get-Date -Format $timeFormat): Waiting for process $($process.Id) to exit."
+                    Stop-Process $process
+                    $process.WaitForExit();
+                }
+            }
+
+            Write-Information "$(Get-Date -Format $timeFormat): Going to sync file changes"
+            $filesChanged = Sync -Path $Path -Destination $Destination -ExcludeFiles $fileRules -ExcludeDirectories $directoryRules -ListOnly $false
+
+            if($process)
+            {
+                Write-Information "$(Get-Date -Format $timeFormat): File changes have been synced, restarting executable."
+                $process = StartExecutable
+            }
+        }
 
         Start-Sleep -Milliseconds $Sleep
     }

@@ -50,7 +50,7 @@ Describe 'Watch-Directory.ps1' {
         $dst = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
 
         $job = Start-Job -ScriptBlock { Start-Sleep -Milliseconds 500; New-Item -Path "$($args[0])\file.txt" } -ArgumentList $src
-        & $script -Path $src -Destination $dst -Timeout 1000 -Sleep 100
+        & $script -Path $src -Destination $dst -Timeout 2000 -Sleep 100
         $job | Wait-Job | Remove-Job
 
         "$($dst)\file.txt" | Should -Exist
