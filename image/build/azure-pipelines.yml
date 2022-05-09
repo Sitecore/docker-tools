@@ -14,7 +14,7 @@ variables:
     baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
     buildImage: mcr.microsoft.com/windows/servercore:$(TARGETOS_ltsc2019)
   ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
-    osName: $(TARGETOS_ltsc2022)
+    osName: ${{ parameters.TargetOs }}
     baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
     buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
