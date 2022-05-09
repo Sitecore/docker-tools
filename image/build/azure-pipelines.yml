@@ -24,12 +24,12 @@ resources:
 - repo: self
 
 parameters:
-  - name: 'PoolName'
-    default: ''
-  - name: 'TargetOs'
-    default: ''
-  - name: 'Sitecore_Version'
-    default: ''
+- name: 'PoolName'
+  default: ''
+- name: 'TargetOs'
+  default: ''
+- name: 'Sitecore_Version'
+  default: ''
 
 variables:
   sitecoreVersion: ${{ parameters.Sitecore_Version }}
