@@ -1,19 +1,31 @@
-stages:
-- stage: Testing
-  jobs:
-  - job: ltsc2019
-    pool: 'Default'
-    steps:
-    - template: azure-pipelines.yml
-      parameters:
-        PoolName: '$(POOLNAME_ltsc2019)'
-        TargetOs: '$(TARGETOS_ltsc2019)'
-        Sitecore_Version: '$(SITECORE_VERSION)'
-  - job: ltsc2022
-    pool: 'Default_ltsc2022'
-    steps:
-    - template: azure-pipelines.yml
-      parameters:
-        PoolName: '$(POOLNAME_ltsc2022)'
-        TargetOs: '$(TARGETOS_ltsc2022)'
-        Sitecore_Version: '$(SITECORE_VERSION)'
+trigger:
+  branches:
+    include:
+    - main
+    - dev
+  paths:
+    include:
+    - 'image/*'
+    exclude:
+    - 'powershell/*'
+
+pr:
+  branches:
+    include:
+    - main
+    - dev
+  paths:
+    include:
+    - 'image/*'
+    exclude:
+    - 'powershell/*'
+
+resources:
+- repo: self
+
+extends:
+  template: azure-pipelines.yml
+  parameters:
+    PoolName: '$(POOLNAME_ltsc2019)'
+    TargetOs: '$(TARGETOS_ltsc2019)'
+    Sitecore_Version: '$(SITECORE_VERSION)'
