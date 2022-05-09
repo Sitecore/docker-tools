@@ -1,3 +1,11 @@
+parameters:
+  - name: 'PoolName'
+    default: ''
+  - name: 'TargetOs'
+    default: ''
+  - name: 'Sitecore_Version'
+    default: ''
+    
 trigger:
   branches:
     include:
@@ -24,11 +32,16 @@ resources:
 - repo: self
 
 variables:
-  sitecoreVersion: 10.3.0
+  sitecoreVersion: ${{ parameters.Sitecore_Version }}
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
-  osName: ltsc2022
-  baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
-  buildImage: mcr.microsoft.com/windows/servercore:$(osName)
+  ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
+    osName: 1809
+    baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
+    buildImage: mcr.microsoft.com/windows/servercore:$(TARGETOS_ltsc2019)
+  ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
+    osName: $(TARGETOS_ltsc2022)
+    baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
+    buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
@@ -39,7 +52,7 @@ variables:
     stability: '-unstable'
     namespace: 'experimental'
 
-pool: Default
+pool: ${{ parameters.PoolName }}
 
 stages:
 
@@ -55,6 +68,10 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
+            Write-Host "PoolName is ${{ parameters.PoolName }}..."
+            Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
+            Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
+            
             Write-Host "Pulling base image $(baseImage)..."
             docker pull $(baseImage)
 

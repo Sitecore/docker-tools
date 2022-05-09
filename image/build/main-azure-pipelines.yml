@@ -1,0 +1,19 @@
+stages:
+- stage: Testing
+  jobs:
+  - job: Build images based on ltsc2019 target os
+    pool: 'Default'
+    steps:
+    - template: /azure-pipelines.yml
+      parameters:
+        PoolName: '$(POOLNAME_ltsc2019)'
+        TargetOs: '$(TARGETOS_ltsc2019)'
+        Sitecore_Version: '$(SITECORE_VERSION)'
+  - job: Build images based on ltsc2022 target os
+    pool: 'Default_ltsc2022'
+    steps:
+    - template: /azure-pipelines.yml
+      parameters:
+        PoolName: '$(POOLNAME_ltsc2022)'
+        TargetOs: '$(TARGETOS_ltsc2022)'
+        Sitecore_Version: '$(SITECORE_VERSION)'
