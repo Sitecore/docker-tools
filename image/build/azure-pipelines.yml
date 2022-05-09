@@ -1,11 +1,3 @@
-parameters:
-  - name: 'PoolName'
-    default: ''
-  - name: 'TargetOs'
-    default: ''
-  - name: 'Sitecore_Version'
-    default: ''
-    
 trigger:
   branches:
     include:
@@ -30,6 +22,14 @@ pr:
 
 resources:
 - repo: self
+
+parameters:
+  - name: 'PoolName'
+    default: ''
+  - name: 'TargetOs'
+    default: ''
+  - name: 'Sitecore_Version'
+    default: ''
 
 variables:
   sitecoreVersion: ${{ parameters.Sitecore_Version }}
