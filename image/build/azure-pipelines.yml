@@ -45,7 +45,8 @@ stages:
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
-            
+            Write-Host "osName is $(osName)..."
+
             Write-Host "Pulling base image $(baseImage)..."
             docker pull $(baseImage)
 
