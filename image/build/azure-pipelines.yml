@@ -10,10 +10,12 @@ variables:
   sitecoreVersion: ${{ parameters.Sitecore_Version }}
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
   ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
+    testOs: 1
     osName: 1809
     baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
     buildImage: mcr.microsoft.com/windows/servercore:$(TARGETOS_ltsc2019)
   ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
+    testOs: 2
     osName: ${{ parameters.TargetOs }}
     baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
     buildImage: mcr.microsoft.com/windows/servercore:$(osName)
@@ -46,6 +48,7 @@ stages:
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
             Write-Host "osName is $(osName)..."
+            Write-Host "testOs is $(testOs)..."
 
             Write-Host "Pulling base image $(baseImage)..."
             docker pull $(baseImage)
