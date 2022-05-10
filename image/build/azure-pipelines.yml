@@ -6,13 +6,12 @@ parameters:
   - name: 'Sitecore_Version'
     default: ''
   - name: 'OsTest'
-    default: ''
 
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
 - name: Os_Test
-  ${{ if eq(upper(parameters.OsTest), 'OSOSOS') }}:
+  ${{ if eq(parameters.OsTest, 'ososos') }}:
     value: '12345'
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: osName
