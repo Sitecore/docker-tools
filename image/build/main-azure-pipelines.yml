@@ -26,6 +26,6 @@ resources:
 extends:
   template: azure-pipelines.yml
   parameters:
-    PoolName: '$(POOLNAME_ltsc2022)'
-    TargetOs: '$(TARGETOS_ltsc2022)'
+    PoolName: '$(POOLNAME_LTSC2022)'
+    TargetOs: '$(TARGETOS_LTSC2022)'
     Sitecore_Version: '$(SITECORE_VERSION)'

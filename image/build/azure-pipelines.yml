@@ -7,10 +7,10 @@ parameters:
     default: ''
 
 variables:
-- ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
+- ${{ if containsValue(parameters.TargetOs, 'ltsc2019') }}:
   - name: test_pure
     value: '2019'
-- ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
+- ${{ if containsValue(parameters.TargetOs, 'ltsc2022') }}:
   - name: test_pure
     value: '2022'
 - name: sitecoreVersion
@@ -25,7 +25,7 @@ variables:
   - name: baseImage
     value: mcr.microsoft.com/windows/nanoserver:$(osName)
   - name: buildImage
-    value: mcr.microsoft.com/windows/servercore:$(TARGETOS_ltsc2019)
+    value: mcr.microsoft.com/windows/servercore:$(TARGETOS_LTSC2019)
 - ${{ if eq(parameters.TargetOs, 'ltsc2022') }}: 
   - name: testOs
     value: '2'
