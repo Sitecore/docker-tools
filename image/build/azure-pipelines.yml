@@ -21,7 +21,7 @@ variables:
   ${{ if not(eq(parameters.OsTest, 'OSOSOS')) }}:
     value: 'not equal'
 - name: osNameTest
-  ${{ if eq(${{ parameters.TargetOs }}, 'ltsc2022') }}:
+  ${{ if eq('${{ parameters.TargetOs }}', 'ltsc2022') }}:
     value: 'equal'
   ${{ else }}:
     value: 'not equal' 
