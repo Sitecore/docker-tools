@@ -53,7 +53,7 @@ variables:
     value: 'experimental'
 - name: revision
   value: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
-- ${{ if eq($targetOsName, 'ltsc2022') }}:
+- ${{ if eq(variables['targetOsName'], 'ltsc2022') }}:
   - name: osName
     value: '12345'
 
