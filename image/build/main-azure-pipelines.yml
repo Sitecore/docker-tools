@@ -29,3 +29,4 @@ extends:
     PoolName: '$(POOLNAME_LTSC2022)'
     TargetOs: '$(TARGETOS_LTSC2022)'
     Sitecore_Version: '$(SITECORE_VERSION)'
+    Os: '$(OS)'

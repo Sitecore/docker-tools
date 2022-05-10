@@ -5,13 +5,15 @@ parameters:
     default: ''
   - name: 'Sitecore_Version'
     default: ''
+  - name: 'Os'
+    default: ''
 
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
+- name: os
+  value: ${{ parameters.Os }}
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
-  - name: testOs
-    value: '1'
   - name: osName
     value: '1809'
   - name: baseImage
@@ -19,8 +21,6 @@ variables:
   - name: buildImage
     value: mcr.microsoft.com/windows/servercore:$(TARGETOS_LTSC2019)
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2022') }}: 
-  - name: testOs
-    value: '2'
   - name: osName
     value: ${{ parameters.TargetOs }}
   - name: baseImage
@@ -63,11 +63,11 @@ stages:
         script: |
             Write-Host "stability is $(stability)..."
             Write-Host "namespace is $(namespace)..."
+            Write-Host "os is $(os)..."
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
             Write-Host "sitecoreVersion is $(sitecoreVersion)..."
-            Write-Host "testOs is $(testOs)..."
             Write-Host "osName is $(osName)..."
             
             
