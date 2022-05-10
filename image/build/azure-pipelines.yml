@@ -57,7 +57,7 @@ variables:
   - name: osName
     value: '12345'   
 - name: Os_Test1
-  ${{ if eq('ltsc2022', 'ltsc2022') }}:
+  ${{ if eq($(TARGETOS_LTSC2022), 'ltsc2022') }}:
     value: '1'
   ${{ else }}:
     value: '2'
