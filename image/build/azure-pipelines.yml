@@ -5,14 +5,14 @@ parameters:
     default: ''
   - name: 'Sitecore_Version'
     default: ''
-  - name: 'Os'
+  - name: 'OsTest'
     default: ''
 
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
-- name: os
-  value: ${{ parameters.Os }}
+- name: Os_Test
+  value: ${{ parameters.OsTest }}
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: osName
     value: '1809'
@@ -63,7 +63,7 @@ stages:
         script: |
             Write-Host "stability is $(stability)..."
             Write-Host "namespace is $(namespace)..."
-            Write-Host "os is $(os)..."
+            Write-Host "Os_Test is $(Os_Test)..."
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
