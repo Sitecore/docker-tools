@@ -9,25 +9,25 @@ parameters:
 variables:
 - name: test_pure
   ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
-    value: 2019
+    value: '2019'
   ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
-    value: 2022
+    value: '2022'
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
 - name: revision
   value: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
 - ${{ if eq(parameters.TargetOs, 'ltsc2019') }}: 
   - name: testOs
-    value: 1
+    value: '1'
   - name: osName
-    value: 1809
+    value: '1809'
   - name: baseImage
     value: mcr.microsoft.com/windows/nanoserver:$(osName)
   - name: buildImage
     value: mcr.microsoft.com/windows/servercore:$(TARGETOS_ltsc2019)
 - ${{ if eq(parameters.TargetOs, 'ltsc2022') }}: 
   - name: testOs
-    value: 2
+    value: '2'
   - name: osName
     value: ${{ parameters.TargetOs }}
   - name: baseImage
