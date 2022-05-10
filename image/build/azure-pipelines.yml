@@ -2,22 +2,24 @@ parameters:
   - name: 'PoolName'
     default: ''
   - name: 'TargetOs'
-    default: 'LTSC2019'
+    default: 'ltsc2019'
     type: string
   - name: 'Sitecore_Version'
     default: ''
   - name: 'OsTest'
-    default: 'ososos'
+    default: OSOSOS
     type: string
 
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
 - name: Os_Test
-  ${{ if eq(parameters.OsTest, 'ososos') }}:
+  ${{ if eq(upper(parameters.OsTest), 'OSOSOS') }}:
     value: '12345'
-  ${{ if ne(parameters.OsTest, 'ososos') }}:
-    value: '123'    
+  ${{ if ne(upper(parameters.OsTest), 'OSOSOS') }}:
+    value: ${{ parameters.OsTest }}
+- ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
+  - osName: '1809'   
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: osName
     value: '1809'
@@ -68,6 +70,7 @@ stages:
         script: |
             Write-Host "stability is $(stability)..."
             Write-Host "namespace is $(namespace)..."
+            Write-Host "OsTest is ${{ parameters.OsTest }}..."
             Write-Host "Os_Test is $(Os_Test)..."
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
