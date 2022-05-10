@@ -7,10 +7,11 @@ parameters:
     default: ''
 
 variables:
-- name: test_pure
-  ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
+- ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
+  - name: test_pure
     value: '2019'
-  ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
+- ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
+  - name: test_pure
     value: '2022'
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
@@ -70,11 +71,11 @@ stages:
         script: |
             Write-Host "stability is $(stability)..."
             Write-Host "namespace is $(namespace)..."
+            Write-Host "test_pure is $(test_pure)..."
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
             Write-Host "test_val is $(test_val)..."
-            Write-Host "test_pure is $(test_pure)..."
             Write-Host "testOs is $(testOs)..."
             Write-Host "sitecoreVersion is $(sitecoreVersion)..."
             Write-Host "osName is $(osName)..."
