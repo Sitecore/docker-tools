@@ -7,6 +7,11 @@ parameters:
     default: ''
 
 variables:
+- name: test_pure
+  ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
+    value: 2019
+  ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
+    value: 2022
   sitecoreVersion: ${{ parameters.Sitecore_Version }}
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
   ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
@@ -47,7 +52,9 @@ stages:
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
-            Write-Host "testOs is $(testOs)..."
+            Write-Host "test_pure is $(test_pure)..."
+            Write-Host "testOs is variables['testOs']..."
+            Write-Host "sitecoreVersion is $(sitecoreVersion)..."
             Write-Host "osName is $(osName)..."
             
 
