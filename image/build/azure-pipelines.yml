@@ -16,9 +16,9 @@ variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
 - name: Os_Test
-  ${{ if eq(upper(parameters.OsTest), 'OSOSOS') }}:
+  ${{ if eq(parameters.OsTest, 'OSOSOS') }}:
     value: 'equal'
-  ${{ if not(eq(upper(parameters.OsTest), 'OSOSOS')) }}:
+  ${{ if not(eq(parameters.OsTest, 'OSOSOS')) }}:
     value: 'not equal'  
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: osName
