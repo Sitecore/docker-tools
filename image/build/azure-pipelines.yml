@@ -50,6 +50,8 @@ variables:
     value: '-unstable'
   - name: namespace
     value: 'experimental'
+- name: test_val
+  value: '2022_test'
 
 stages:
 - stage: Versioning
@@ -69,6 +71,7 @@ stages:
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
+            Write-Host "test_val is $(test_val)..."
             Write-Host "test_pure is ${{ variables.test_pure }}..."
             Write-Host "testOs is ${{ variables.testOs }}..."
             Write-Host "sitecoreVersion is $(sitecoreVersion)..."
