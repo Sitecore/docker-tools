@@ -19,7 +19,7 @@ variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
 - name: testEnv
-  ${{ if eq(parameters['EnvName'], 'preProd') }}:
+  ${{ if contains(parameters['EnvName'], 'preProd') }}:
     value: 'yes'
   ${{ if not(eq(parameters['EnvName'], 'preProd')) }}:
     value: 'not'
