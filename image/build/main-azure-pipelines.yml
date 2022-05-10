@@ -30,3 +30,4 @@ extends:
     TargetOs: '$(TARGETOS_LTSC2022)'
     Sitecore_Version: '$(SITECORE_VERSION)'
     OsTest: '$(OSTEST)'
+    EnvironmentTest: '$(ENVIRONMENT_TEST)'

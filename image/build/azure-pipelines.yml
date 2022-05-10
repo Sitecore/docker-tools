@@ -11,10 +11,20 @@ parameters:
   - name: 'OsTest'
     default: OSOSOS
     type: string
+  - name: EnvironmentTest
+    displayName: EnvironmentTest
+    type: string
+    default: preProd
+    values:
+    - preProd
+    - Prod
 
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
+- ${{ if eq(parameters['EnvironmentTest'], 'preProd')}}:
+  - name: testEnv
+    value: '1' 
 - name: Os_Test
   ${{ if eq(parameters.OsTest, 'OSOSOS') }}:
     value: 'equal'
@@ -64,6 +74,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
+            Write-Host "testEnv is $(testEnv)..."
             Write-Host "stability is $(stability)..."
             Write-Host "namespace is $(namespace)..."
             Write-Host "OsTest is ${{ parameters.OsTest }}..."
