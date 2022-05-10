@@ -21,7 +21,7 @@ variables:
 - name: testEnv
   ${{ if contains(parameters['EnvName'], 'preProd') }}:
     value: 'yes'
-  ${{ if not(eq(parameters['EnvName'], 'preProd')) }}:
+  ${{ if ne(parameters['EnvName'], 'preProd') }}:
     value: 'not'
 - name: Os_Test
   ${{ if eq(parameters.OsTest, 'OSOSOS') }}:
@@ -72,7 +72,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-            Write-Host "EnvName is ${{ parameters.EnvName }}..."
+            Write-Host "EnvName is ${{ parameters['EnvName'] }}..."
             Write-Host "testEnv is $(testEnv)..."
             Write-Host "stability is $(stability)..."
             Write-Host "namespace is $(namespace)..."
