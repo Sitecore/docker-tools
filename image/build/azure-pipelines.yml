@@ -17,7 +17,7 @@ variables:
   ${{ if eq(parameters.OsTest, 'ososos') }}:
     value: '12345'
   ${{ if ne(parameters.OsTest, 'ososos') }}:
-    value: ${{ parameters.OsTest }}    
+    value: '123'    
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: osName
     value: '1809'
