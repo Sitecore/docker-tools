@@ -69,10 +69,10 @@ stages:
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
-            Write-Host "test_pure is $(test_pure)..."
-            Write-Host "testOs is variables['testOs']..."
+            Write-Host "test_pure is ${{ variables.test_pure }}..."
+            Write-Host "testOs is ${{ variables.testOs }}..."
             Write-Host "sitecoreVersion is $(sitecoreVersion)..."
-            Write-Host "osName is $(osName)..."
+            Write-Host "osName is ${{ variables.osName }}..."
             
 
             Write-Host "Pulling base image $(baseImage)..."
