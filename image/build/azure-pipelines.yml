@@ -18,9 +18,11 @@ parameters:
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
-- ${{ if eq(parameters['EnvName'], 'preProd') }}:
-  - name: testEnv
-    value: '1' 
+- name: testEnv
+  ${{ if eq(parameters['EnvName'], 'preProd') }}:
+    value: 'yes'
+  ${{ if not(eq(parameters['EnvName'], 'preProd')) }}:
+    value: 'not'
 - name: Os_Test
   ${{ if eq(parameters.OsTest, 'OSOSOS') }}:
     value: 'equal'
