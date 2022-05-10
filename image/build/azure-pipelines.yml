@@ -14,6 +14,9 @@ parameters:
   - name: 'EnvName'
     type: string
     default: preProd
+    values:
+    - preProd
+    - Prod
 
 variables:
 - name: sitecoreVersion
