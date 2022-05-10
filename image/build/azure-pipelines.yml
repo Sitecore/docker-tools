@@ -20,6 +20,11 @@ variables:
     value: 'equal'
   ${{ if not(eq(parameters.OsTest, 'OSOSOS')) }}:
     value: 'not equal'
+- name: osNameTest
+  ${{ if eq('ltsc2022', 'ltsc2022') }}:
+    value: 'equal'
+  ${{ else }}:
+    value: 'not equal' 
 - name: osName
   ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
     value: 'equal'
@@ -67,7 +72,10 @@ stages:
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
             Write-Host "sitecoreVersion is $(sitecoreVersion)..."
+            Write-Host "osNameTest is $(osNameTest)..."
             Write-Host "osName is $(osName)..."
+            
+            
             
             
 
