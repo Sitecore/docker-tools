@@ -1,11 +1,13 @@
 parameters:
   - name: 'PoolName'
     default: ''
+    type: string
   - name: 'TargetOs'
-    default: 'ltsc2019'
+    default: LTSC2019
     type: string
   - name: 'Sitecore_Version'
     default: ''
+    type: string
   - name: 'OsTest'
     default: OSOSOS
     type: string
@@ -15,11 +17,9 @@ variables:
   value: ${{ parameters.Sitecore_Version }}
 - name: Os_Test
   ${{ if eq(upper(parameters.OsTest), 'OSOSOS') }}:
-    value: '12345'
-  ${{ if ne(upper(parameters.OsTest), 'OSOSOS') }}:
-    value: ${{ parameters.OsTest }}
-- ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
-  - osName: '1809'   
+    value: 'equal'
+  ${{ if not(eq(parameters.OsTest, 'OSOSOS')) }}:
+    value: 'not equal'  
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: osName
     value: '1809'
