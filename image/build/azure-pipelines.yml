@@ -57,9 +57,9 @@ variables:
   - name: osName
     value: '12345'   
 - name: Os_Test1
-  ${{ if eq(variables['targetOsName'], "ltsc2022") }}:
+  ${{ if eq('ltsc2022', 'ltsc2022') }}:
     value: '1'
-  ${{ if not(eq(variables['targetOsName'], "ltsc2022")) }}:
+  ${{ if not(eq(variables['targetOsName'], 'ltsc2022')) }}:
     value: '2'
 
 stages:
