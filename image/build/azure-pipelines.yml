@@ -3,7 +3,7 @@ parameters:
     default: ''
     type: string
   - name: 'TargetOs'
-    default: 'ltsc2022'
+    default: 'ltsc2019'
     type: string
   - name: 'Sitecore_Version'
     default: ''
@@ -23,7 +23,7 @@ variables:
 - name: osName
   ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
     value: 'equal'
-  ${{ if not(eq(parameters.TargetOs, 'ltsc2022')) }}:
+  ${{ else }}:
     value: 'not equal' 
 - name: buildNumber
   value: $(Build.BuildID)
