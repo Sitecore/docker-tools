@@ -13,16 +13,13 @@ parameters:
     type: string
   - name: 'EnvName'
     type: string
-    default: preProd
-    values:
-    - preProd
-    - Prod
+    default: 'preProd'
 
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
 - name: testEnv
-  ${{ if contains(parameters['EnvName'], 'preProd') }}:
+  ${{ if eq(parameters['EnvName'], 'preProd') }}:
     value: 'yes'
   ${{ if ne(parameters['EnvName'], 'preProd') }}:
     value: 'not'
