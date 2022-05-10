@@ -19,14 +19,12 @@ variables:
   ${{ if eq(parameters.OsTest, 'OSOSOS') }}:
     value: 'equal'
   ${{ if not(eq(parameters.OsTest, 'OSOSOS')) }}:
-    value: 'not equal'  
-- ${{ if eq(parameters.TargetOs, 'ltsc2022') }}: 
-  - name: osName
-    value: ${{ parameters.TargetOs }}
-  - name: baseImage
-    value: mcr.microsoft.com/windows/nanoserver:$(osName)
-  - name: buildImage
-    value: mcr.microsoft.com/windows/servercore:$(osName)
+    value: 'not equal'
+- name: osName
+  ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
+    value: 'equal'
+  ${{ if not(eq(parameters.TargetOs, 'ltsc2022')) }}:
+    value: 'not equal' 
 - name: buildNumber
   value: $(Build.BuildID)
 - name: azureContainerRegistry
