@@ -9,10 +9,10 @@ parameters:
 variables:
 - name: testik
   value: ${{ parameters.TargetOs }}
-- ${{ if containsValue(parameters.TargetOs, 'ltsc2019') }}:
+- ${{ if eq(lower(parameters.TargetOs), 'ltsc2019') }}:
   - name: test_pure
     value: '2019'
-- ${{ if containsValue(parameters.TargetOs, 'ltsc2022') }}:
+- ${{ if eq(lower(parameters.TargetOs), 'ltsc2022') }}:
   - name: test_pure
     value: '2022'
 - name: sitecoreVersion
