@@ -18,6 +18,8 @@ parameters:
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
+- name: targetOsName
+  value: ${{ parameters.TargetOs }}
 - name: testEnv
   ${{ if eq(parameters['EnvName'], 'preProd') }}:
     value: 'yes'
@@ -30,11 +32,6 @@ variables:
     value: 'not equal'
 - name: osNameTest
   ${{ if eq('${{ parameters.TargetOs }}', 'ltsc2022') }}:
-    value: 'equal'
-  ${{ else }}:
-    value: 'not equal' 
-- name: osName
-  ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
     value: 'equal'
   ${{ else }}:
     value: 'not equal' 
@@ -56,6 +53,9 @@ variables:
     value: 'experimental'
 - name: revision
   value: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
+- ${{ if eq($targetOsName, 'ltsc2022') }}:
+  - name: osName
+    value: '12345'
 
 stages:
 - stage: Versioning
@@ -72,6 +72,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
+            Write-Host "targetOsName = $(targetOsName)"
             Write-Host "EnvName is ${{ parameters['EnvName'] }}..."
             Write-Host "testEnv is $(testEnv)..."
             Write-Host "stability is $(stability)..."
