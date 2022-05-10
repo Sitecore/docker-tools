@@ -7,7 +7,6 @@ parameters:
   - name: 'Sitecore_Version'
     default: ''
   - name: 'OsTest'
-    default: 'OSOSOS'
     type: string
 
 variables:
