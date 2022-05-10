@@ -9,8 +9,6 @@ parameters:
 variables:
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
-- name: revision
-  value: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: testOs
     value: '1'
@@ -45,6 +43,8 @@ variables:
     value: '-unstable'
   - name: namespace
     value: 'experimental'
+- name: revision
+  value: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
 
 stages:
 - stage: Versioning
@@ -67,8 +67,9 @@ stages:
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
             Write-Host "sitecoreVersion is $(sitecoreVersion)..."
-            Write-Host "osName is $(osName)..."
             Write-Host "testOs is $(testOs)..."
+            Write-Host "osName is $(osName)..."
+            
             
 
             Write-Host "Pulling base image $(baseImage)..."
