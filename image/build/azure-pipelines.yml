@@ -10,10 +10,10 @@ variables:
 - name: testik
   value: ${{ parameters.TargetOs }}
 - ${{ if eq(lower(parameters.TargetOs), 'ltsc2019') }}:
-  - name: test_pure
+  - name: testPure
     value: '2019'
 - ${{ if eq(lower(parameters.TargetOs), 'ltsc2022') }}:
-  - name: test_pure
+  - name: testPure
     value: '2022'
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
@@ -74,7 +74,7 @@ stages:
             Write-Host "stability is $(stability)..."
             Write-Host "namespace is $(namespace)..."
             Write-Host "testik is $(testik)..."
-            Write-Host "test_pure is $(test_pure)..."
+            Write-Host "testPure is $(testPure)..."
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
