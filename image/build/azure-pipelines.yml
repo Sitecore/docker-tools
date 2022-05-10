@@ -7,19 +7,11 @@ parameters:
     default: ''
 
 variables:
-- name: testik
-  value: ${{ parameters.TargetOs }}
-- ${{ if eq(lower(parameters.TargetOs), 'ltsc2019') }}:
-  - name: testPure
-    value: '2019'
-- ${{ if eq(lower(parameters.TargetOs), 'ltsc2022') }}:
-  - name: testPure
-    value: '2022'
 - name: sitecoreVersion
   value: ${{ parameters.Sitecore_Version }}
 - name: revision
   value: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
-- ${{ if eq(parameters.TargetOs, 'ltsc2019') }}: 
+- ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: testOs
     value: '1'
   - name: osName
@@ -28,7 +20,7 @@ variables:
     value: mcr.microsoft.com/windows/nanoserver:$(osName)
   - name: buildImage
     value: mcr.microsoft.com/windows/servercore:$(TARGETOS_LTSC2019)
-- ${{ if eq(parameters.TargetOs, 'ltsc2022') }}: 
+- ${{ if eq(upper(parameters.TargetOs), 'LTSC2022') }}: 
   - name: testOs
     value: '2'
   - name: osName
@@ -53,8 +45,6 @@ variables:
     value: '-unstable'
   - name: namespace
     value: 'experimental'
-- name: test_val
-  value: '2022_test'
 
 stages:
 - stage: Versioning
@@ -73,15 +63,12 @@ stages:
         script: |
             Write-Host "stability is $(stability)..."
             Write-Host "namespace is $(namespace)..."
-            Write-Host "testik is $(testik)..."
-            Write-Host "testPure is $(testPure)..."
             Write-Host "PoolName is ${{ parameters.PoolName }}..."
             Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
             Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
-            Write-Host "test_val is $(test_val)..."
-            Write-Host "testOs is $(testOs)..."
             Write-Host "sitecoreVersion is $(sitecoreVersion)..."
             Write-Host "osName is $(osName)..."
+            Write-Host "testOs is $(testOs)..."
             
 
             Write-Host "Pulling base image $(baseImage)..."
