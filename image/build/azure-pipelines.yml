@@ -3,7 +3,7 @@ parameters:
     default: ''
     type: string
   - name: 'TargetOs'
-    default: 'ltsc2019'
+    default: 'ltsc2022'
     type: string
   - name: 'Sitecore_Version'
     default: ''
