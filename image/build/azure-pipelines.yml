@@ -7,7 +7,7 @@ parameters:
   - name: 'Sitecore_Version'
     default: ''
   - name: 'OsTest'
-    default: 'OSOSOS'
+    default: ''
     type: string
 
 variables:
@@ -17,7 +17,7 @@ variables:
   ${{ if eq(upper(parameters.OsTest), 'OSOSOS') }}:
     value: '12345'
   ${{ if ne(upper(parameters.OsTest), 'OSOSOS') }}:
-    value: ${{ parameters.OsTest }}
+    value: ${{ parameters.OsTest }}    
 - ${{ if eq(upper(parameters.TargetOs), 'LTSC2019') }}:
   - name: osName
     value: '1809'
