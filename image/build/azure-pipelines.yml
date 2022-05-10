@@ -57,9 +57,9 @@ variables:
   - name: osName
     value: '12345'   
 - name: Os_Test1
-  ${{ if eq(variables['targetOsName'], 'ltsc2022') }}:
+  ${{ if eq(variables['targetOsName'], ltsc2022) }}:
     value: '1'
-  ${{ if not(eq(variables['targetOsName'], 'ltsc2022')) }}:
+  ${{ if not(eq(variables['targetOsName'], ltsc2022)) }}:
     value: '2'
 
 stages:
@@ -78,8 +78,6 @@ stages:
         targetType: 'inline'
         script: |
             Write-Host "Os_Test1 = $(Os_Test1)"
-            Write-Host "var targetOsName is variables['targetOsName']"
-        
             Write-Host "targetOsName = $(targetOsName)"
             Write-Host "EnvName is ${{ parameters['EnvName'] }}..."
             Write-Host "testEnv is $(testEnv)..."
