@@ -12,27 +12,44 @@ variables:
     value: 2019
   ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
     value: 2022
-  sitecoreVersion: ${{ parameters.Sitecore_Version }}
-  revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
-  ${{ if eq(parameters.TargetOs, 'ltsc2019') }}:
-    testOs: 1
-    osName: 1809
-    baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
-    buildImage: mcr.microsoft.com/windows/servercore:$(TARGETOS_ltsc2019)
-  ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
-    testOs: 2
-    osName: ${{ parameters.TargetOs }}
-    baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
-    buildImage: mcr.microsoft.com/windows/servercore:$(osName)
-  buildNumber: $(Build.BuildID)
-  azureContainerRegistry: $(ACR_ContainerRegistry)
-  azureSubscriptionEndpoint: AKSServiceConnections
-  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-    stability: ''
-    namespace: 'tools'
-  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-    stability: '-unstable'
-    namespace: 'experimental'
+- name: sitecoreVersion
+  value: ${{ parameters.Sitecore_Version }}
+- name: revision
+  value: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
+- ${{ if eq(parameters.TargetOs, 'ltsc2019') }}: 
+  - name: testOs
+    value: 1
+  - name: osName
+    value: 1809
+  - name: baseImage
+    value: mcr.microsoft.com/windows/nanoserver:$(osName)
+  - name: buildImage
+    value: mcr.microsoft.com/windows/servercore:$(TARGETOS_ltsc2019)
+- ${{ if eq(parameters.TargetOs, 'ltsc2022') }}: 
+  - name: testOs
+    value: 2
+  - name: osName
+    value: ${{ parameters.TargetOs }}
+  - name: baseImage
+    value: mcr.microsoft.com/windows/nanoserver:$(osName)
+  - name: buildImage
+    value: mcr.microsoft.com/windows/servercore:$(osName)
+- name: buildNumber
+  value: $(Build.BuildID)
+- name: azureContainerRegistry
+  value: $(ACR_ContainerRegistry)
+- name: azureSubscriptionEndpoint
+  value: AKSServiceConnections
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - name: stability
+    value: ''
+  - name: namespace
+    value: 'tools'
+- ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+  - name: stability
+    value: '-unstable'
+  - name: namespace
+    value: 'experimental'
 
 stages:
 - stage: Versioning
