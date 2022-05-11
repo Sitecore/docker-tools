@@ -1,74 +1,52 @@
-parameters:
-  - name: 'PoolName'
-    default: ''
-    type: string
-  - name: 'TargetOs'
-    default: 'ltsc2019'
-    type: string
-  - name: 'Sitecore_Version'
-    default: ''
-    type: string
-  - name: 'OsTest'
-    default: OSOSOS
-    type: string
-  - name: 'EnvName'
-    type: string
-    default: 'preProd'
+trigger:
+  branches:
+    include:
+    - main
+    - dev
+  paths:
+    include:
+    - 'image/*'
+    exclude:
+    - 'powershell/*'
+
+pr:
+  branches:
+    include:
+    - main
+    - dev
+  paths:
+    include:
+    - 'image/*'
+    exclude:
+    - 'powershell/*'
+
+resources:
+- repo: self
 
 variables:
-- name: sitecoreVersion
-  value: ${{ parameters.Sitecore_Version }}
-- name: targetOsName
-  value: ${{ parameters.TargetOs }}
-- name: testEnv
-  ${{ if eq(parameters['EnvName'], 'preProd') }}:
-    value: 'yes'
-  ${{ if ne(parameters['EnvName'], 'preProd') }}:
-    value: 'not'
-- name: Os_Test
-  ${{ if eq(parameters.OsTest, 'OSOSOS') }}:
-    value: 'equal'
-  ${{ if not(eq(parameters.OsTest, 'OSOSOS')) }}:
-    value: 'not equal'
-- name: osNameTest
-  ${{ if eq('${{ parameters.TargetOs }}', 'ltsc2022') }}:
-    value: 'equal'
-  ${{ else }}:
-    value: 'not equal' 
-- name: buildNumber
-  value: $(Build.BuildID)
-- name: azureContainerRegistry
-  value: $(ACR_ContainerRegistry)
-- name: azureSubscriptionEndpoint
-  value: AKSServiceConnections
-- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-  - name: stability
-    value: ''
-  - name: namespace
-    value: 'tools'
-- ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-  - name: stability
-    value: '-unstable'
-  - name: namespace
-    value: 'experimental'
-- name: revision
-  value: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
-- ${{ if eq(variables['targetOsName'], 'ltsc2022') }}:
-  - name: osName
-    value: '12345'   
-- name: Os_Test1
-  ${{ if eq(parameters.TargetOs, 'ltsc2022') }}:
-    value: '1'
-  ${{ else }}:
-    value: '2'
+  sitecoreVersion: 10.3.0
+  revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
+  osName: ltsc2022
+  baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
+  buildImage: mcr.microsoft.com/windows/servercore:$(osName)
+  buildNumber: $(Build.BuildID)
+  azureContainerRegistry: $(ACR_ContainerRegistry)
+  azureSubscriptionEndpoint: AKSServiceConnections
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    stability: ''
+    namespace: 'tools'
+  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+    stability: '-unstable'
+    namespace: 'experimental'
+
+pool: Default
 
 stages:
+
 - stage: Versioning
 
   jobs:
   - job: Tagging
-    pool:
-      name: ${{ parameters.PoolName }}
     steps:
     
     - task: PowerShell@2
@@ -77,25 +55,6 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-            Write-Host "Os_Test1 = $(Os_Test1)"
-            Write-Host "targetOsName = $(targetOsName)"
-            Write-Host "EnvName is ${{ parameters['EnvName'] }}..."
-            Write-Host "testEnv is $(testEnv)..."
-            Write-Host "stability is $(stability)..."
-            Write-Host "namespace is $(namespace)..."
-            Write-Host "OsTest is ${{ parameters.OsTest }}..."
-            Write-Host "Os_Test is $(Os_Test)..."
-            Write-Host "PoolName is ${{ parameters.PoolName }}..."
-            Write-Host "TargetOs is ${{ parameters.TargetOs }}..."
-            Write-Host "Sitecore_Version is ${{ parameters.Sitecore_Version }}..."
-            Write-Host "sitecoreVersion is $(sitecoreVersion)..."
-            Write-Host "osNameTest is $(osNameTest)..."
-            Write-Host "osName is $(osName)..."
-            
-            
-            
-            
-
             Write-Host "Pulling base image $(baseImage)..."
             docker pull $(baseImage)
 
@@ -114,8 +73,6 @@ stages:
 
   jobs:
   - job: Build
-    pool:
-      name: ${{ parameters.PoolName }}
     displayName: Build image
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
@@ -144,8 +101,6 @@ stages:
 
   jobs:
   - job: Pester
-    pool:
-      name: ${{ parameters.PoolName }}
     displayName: Run Pester tests
     steps:
 
@@ -168,8 +123,6 @@ stages:
 
   jobs:
   - job: Push
-    pool:
-      name: ${{ parameters.PoolName }}
     displayName: Push image
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
