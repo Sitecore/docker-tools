@@ -3,6 +3,7 @@ trigger:
     include:
     - main
     - dev
+    - feature/10.3.0/532101-modify-azure-pipelines-yml-file-for-build-images-based-on-ltsc2019-and-ltsc2022-target-os
   paths:
     include:
     - 'image/*'
@@ -14,6 +15,7 @@ pr:
     include:
     - main
     - dev
+    - feature/10.3.0/532101-modify-azure-pipelines-yml-file-for-build-images-based-on-ltsc2019-and-ltsc2022-target-os
   paths:
     include:
     - 'image/*'
