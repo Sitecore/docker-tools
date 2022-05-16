@@ -27,7 +27,7 @@ variables:
   sitecoreVersion: $(SITECORE_VERSION)
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
   osName: $(TARGETOS_LTSC2022)
-  baseImage: mcr.microsoft.com/windows/nanoserver:$(osName)
+  baseImage: mcr.microsoft.com/windows/nanoserver:10.0.20348.643
   buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
