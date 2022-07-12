@@ -3,8 +3,7 @@ Set-StrictMode -Version Latest
 function Get-EnvFileContent {
     Param (
         [Parameter(Mandatory = $true)]
-        [ValidateScript( { Test-Path $_ -IsValid })]
-        [ValidateScript( { [System.IO.Path]::IsPathRooted($_) })]
+        [ValidateScript( { Test-Path $_ -IsValid })]        
         [string]
         $File
     )
