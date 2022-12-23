@@ -1,0 +1,148 @@
+trigger:
+  branches:
+    include:
+    - main
+    - dev
+    - 'release/*'
+  paths:
+    include:
+    - 'image/*'
+    exclude:
+    - 'powershell/*'
+
+pr:
+  branches:
+    include:
+    - main
+    - dev
+    - 'release/*'
+  paths:
+    include:
+    - 'image/*'
+    exclude:
+    - 'powershell/*'
+
+resources:
+- repo: self
+
+variables:
+  sitecoreVersion: $(SITECORE_VERSION)
+  revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 100)]
+  osName: 1809
+  baseImage: mcr.microsoft.com/windows/nanoserver:10.0.17763.2803
+  buildImage: mcr.microsoft.com/windows/servercore:$(TARGETOS_LTSC2019)
+  buildNumber: $(Build.BuildID)
+  azureContainerRegistry: $(ACR_ContainerRegistry)
+  azureSubscriptionEndpoint: AKSServiceConnections
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    stability: ''
+    namespace: 'tools'
+  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+    stability: '-unstable'
+    namespace: 'experimental'
+
+pool: $(POOLNAME_LTSC2019)
+
+stages:
+
+- stage: Versioning
+
+  jobs:
+  - job: Tagging
+    steps:
+    
+    - task: PowerShell@2
+      name: Tags
+      displayName: Generate tags
+      inputs:
+        targetType: 'inline'
+        script: |
+            Write-Host "Pulling base image $(baseImage)..."
+            docker pull $(baseImage)
+
+            [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
+            Write-Host "Image OS version is '$osVersion'"
+
+            [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
+            [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
+            Write-Host "Setting long tag to '$longTag'"
+            Write-Host "Setting short tag to '$shortTag'"
+            Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
+            Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
+            
+- stage: Build
+  dependsOn: Versioning
+
+  jobs:
+  - job: Build
+    displayName: Build image
+    variables:
+      longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
+      shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
+    steps:
+    
+    - task: DockerCompose@0
+      displayName: Building image
+      inputs:
+        containerregistrytype: Azure Container Registry
+        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+        azureContainerRegistry: $(azureContainerRegistry)
+        dockerComposeFile: '**/docker-compose.yml'
+        dockerComposeFileArgs: |
+          REGISTRY=$(azureContainerRegistry)/$(namespace)/
+          VERSION=$(longTag)
+          BASE_IMAGE=$(baseImage)
+          BUILD_IMAGE=$(buildImage)
+        action: Build services
+        additionalImageTags: '$(shortTag)'
+        arguments: '--force-rm'
+        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+
+- stage: Test
+  dependsOn: Build
+
+  jobs:
+  - job: Pester
+    displayName: Run Pester tests
+    steps:
+
+    - task: Pester@9
+      inputs:
+        scriptFolder: "$(Build.SourcesDirectory)/image/test/*"
+        resultsFile: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
+        usePSCore: False
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: "NUnit"
+        testResultsFiles: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
+        failTaskOnFailedTests: true
+        
+- stage: Push
+  dependsOn:
+  - Versioning
+  - Test
+  condition: ne(variables['Build.Reason'], 'PullRequest')
+
+  jobs:
+  - job: Push
+    displayName: Push image
+    variables:
+      longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
+      shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
+    steps:
+
+    - task: DockerCompose@0
+      displayName: Pushing image
+      inputs:
+        containerregistrytype: Azure Container Registry
+        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+        azureContainerRegistry: $(azureContainerRegistry)
+        dockerComposeFile: '**/docker-compose.yml'
+        dockerComposeFileArgs: |
+          REGISTRY=$(azureContainerRegistry)/$(namespace)/
+          VERSION=$(longTag)
+          BASE_IMAGE=$(baseImage)
+          BUILD_IMAGE=$(buildImage)
+        action: Push services
+        additionalImageTags: '$(shortTag)'
+        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
