@@ -40,7 +40,6 @@ variables:
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     stability: '-unstable'
     namespace: 'experimental'
-  buildReason: $(Build.Reason)
 
 pool: $(POOLNAME_LTSC2022)
 
@@ -70,7 +69,6 @@ stages:
             Write-Host "Setting short tag to '$shortTag'"
             Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
             Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
-            Write-Host "buildReason is $(buildReason)"
             
 - stage: Build
   dependsOn: Versioning
@@ -123,7 +121,7 @@ stages:
   dependsOn:
   - Versioning
   - Test
-  condition: ne(variables['Build.Reason'], 'PullRequest')
+  #condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Push
