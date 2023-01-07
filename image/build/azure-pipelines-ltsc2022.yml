@@ -40,6 +40,9 @@ variables:
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     stability: '-unstable'
     namespace: 'experimental'
+  ${{ if and(ne(variables['Build.SourceBranchName'], 'main'),contains(variables['System.PullRequest.TargetBranch'], 'release') ) }}:
+    stability: ''
+    namespace: 'tools'
   targetBranch: $(System.PullRequest.TargetBranch)
 
 pool: $(POOLNAME_LTSC2022)
@@ -70,7 +73,7 @@ stages:
             Write-Host "Setting short tag to '$shortTag'"
             Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
             Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
-            Write-Host "targetBranch is $(targetBranch)..."
+            Write-Host "targetBranch is $(targetBranch)"
             
 - stage: Build
   dependsOn: Versioning
