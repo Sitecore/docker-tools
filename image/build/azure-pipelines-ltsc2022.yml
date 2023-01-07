@@ -37,12 +37,15 @@ variables:
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
-  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+  ${{ elseif ne(variables['Build.SourceBranchName'], 'main') }}:
     stability: '-unstable'
     namespace: 'experimental'
-  ${{ if and(ne(variables['Build.SourceBranchName'], 'main'),eq(variables['System.PullRequest.TargetBranch'], 'release/$(sitecoreVersion)') ) }}:
+  ${{ elseif and(ne(variables['Build.SourceBranchName'], 'main'),eq(variables['System.PullRequest.TargetBranch'], 'release/$(sitecoreVersion)') ) }}:
     stability: ''
     namespace: 'tools'
+  ${{ else }}:
+    stability: '-unstable'
+    namespace: 'experimental'
   targetBranch: $(System.PullRequest.TargetBranch)
   
 
