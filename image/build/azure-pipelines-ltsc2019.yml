@@ -39,7 +39,7 @@ variables:
     namespace: 'tools'
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     stability: '-unstable'
-    namespace: 'experimental'   
+    namespace: 'experimental'
 
 pool: $(POOLNAME_LTSC2019)
 

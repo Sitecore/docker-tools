@@ -34,7 +34,7 @@ variables:
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
-  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  ${{ if or(eq(variables['Build.SourceBranchName'], 'main'),contains(variables['System.PullRequest.TargetBranch'], 'release') ) }}:
     stability: ''
     namespace: 'tools'
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
@@ -69,7 +69,6 @@ stages:
             Write-Host "Setting short tag to '$shortTag'"
             Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
             Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
-            Write-Host "TargetBranch is $(System.PullRequest.TargetBranch)"
             
 - stage: Build
   dependsOn: Versioning
