@@ -40,10 +40,11 @@ variables:
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     stability: '-unstable'
     namespace: 'experimental'
-  ${{ if and(ne(variables['Build.SourceBranchName'], 'main'),contains(variables['System.PullRequest.TargetBranch'], 'release') ) }}:
+  ${{ if and(ne(variables['Build.SourceBranchName'], 'main'),eq(variables['System.PullRequest.TargetBranch'], 'release/$(sitecoreVersion)') ) }}:
     stability: ''
     namespace: 'tools'
   targetBranch: $(System.PullRequest.TargetBranch)
+  
 
 pool: $(POOLNAME_LTSC2022)
 
