@@ -34,7 +34,7 @@ variables:
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
-  ${{ if or(eq(variables['Build.SourceBranchName'], 'main'),contains(variables['System.PullRequest.TargetBranch'], 'release') ) }}:
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
