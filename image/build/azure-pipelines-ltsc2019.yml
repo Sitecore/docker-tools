@@ -3,7 +3,7 @@ trigger:
     include:
     - main
     - dev
-    - 'release/*'
+    - release/*
   paths:
     include:
     - 'image/*'
@@ -15,7 +15,7 @@ pr:
     include:
     - main
     - dev
-    - 'release/*'
+    - release/*
   paths:
     include:
     - 'image/*'
@@ -34,12 +34,15 @@ variables:
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
-  ${{ if or(eq(variables['Build.SourceBranchName'], 'main'),contains(variables['System.PullRequest.TargetBranch'], 'release') ) }}:
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     stability: ''
     namespace: 'tools'
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     stability: '-unstable'
-    namespace: 'experimental'
+    namespace: 'experimental'   
+  ${{ if and(ne(variables['Build.SourceBranchName'], 'main'),contains(variables['System.PullRequest.TargetBranch'], 'release') ) }}:
+    stability: ''
+    namespace: 'tools'
 
 pool: $(POOLNAME_LTSC2019)
 
