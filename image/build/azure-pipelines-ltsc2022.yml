@@ -34,20 +34,13 @@ variables:
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
-  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-    stability: ''
-    namespace: 'tools'
-  ${{ elseif ne(variables['Build.SourceBranchName'], 'main') }}:
-    stability: '-unstable'
-    namespace: 'experimental'
-  ${{ elseif and(ne(variables['Build.SourceBranchName'], 'main'),eq(variables['System.PullRequest.TargetBranch'], 'release/$(sitecoreVersion)') ) }}:
-    stability: ''
-    namespace: 'tools'
-  ${{ else }}:
-    stability: '-unstable'
-    namespace: 'experimental'
   targetBranch: $(System.PullRequest.TargetBranch)
-  
+  ${{ if or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['targetBranch'], 'release/$(sitecoreVersion)')) }}:
+    stability: ''
+    namespace: 'tools'
+  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+    stability: '-unstable'
+    namespace: 'experimental'
 
 pool: $(POOLNAME_LTSC2022)
 
@@ -78,6 +71,8 @@ stages:
             Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
             Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
             Write-Host "targetBranch is $(targetBranch)"
+            Write-Host "branch is 'release/$(sitecoreVersion)'"
+            
             
 - stage: Build
   dependsOn: Versioning
