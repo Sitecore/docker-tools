@@ -77,8 +77,8 @@ stages:
             Write-Host "##vso[task.setvariable variable=stability;isOutput=true]$stability"
             Write-Host "##vso[task.setvariable variable=namespace;isOutput=true]$namespace"
 
-            [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
-            [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
+            [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$stability"
+            [string] $shortTag = "$(sitecoreVersion)-$(osName)$stability"
             Write-Host "Setting long tag to '$longTag'"
             Write-Host "Setting short tag to '$shortTag'"
             Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
