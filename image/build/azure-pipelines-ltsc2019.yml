@@ -34,12 +34,14 @@ variables:
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
-  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-    stability: ''
-    namespace: 'tools'
-  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-    stability: '-unstable'
-    namespace: 'experimental'
+  sourceBranch: $(Build.SourceBranchName)
+  targetBranch: $(System.PullRequest.TargetBranch)
+  #${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    #stability: ''
+    #namespace: 'tools'
+  #${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+    #stability: '-unstable'
+    #namespace: 'experimental'
 
 pool: $(POOLNAME_LTSC2019)
 
@@ -62,6 +64,18 @@ stages:
 
             [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
             Write-Host "Image OS version is '$osVersion'"
+            
+            if("$(sourceBranch)" -eq 'main' -or "$(targetBranch)" -eq 'release/$(sitecoreVersion)'){
+                [string] $stability = ""
+                [string] $namespace = "tools"
+            }else{
+                [string] $stability = "-unstable"
+                [string] $namespace = "experimental"
+            }
+            Write-Host "Setting stability to '$stability'"
+            Write-Host "Setting namespace to '$namespace'"
+            Write-Host "##vso[task.setvariable variable=stability;isOutput=true]$stability"
+            Write-Host "##vso[task.setvariable variable=namespace;isOutput=true]$namespace"
 
             [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
             [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
@@ -79,6 +93,7 @@ stages:
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
+      namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
     
     - task: DockerCompose@0
@@ -121,7 +136,7 @@ stages:
   dependsOn:
   - Versioning
   - Test
-  condition: ne(variables['Build.Reason'], 'PullRequest')
+  #condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Push
@@ -129,6 +144,7 @@ stages:
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
+      namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
     - task: DockerCompose@0

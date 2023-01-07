@@ -83,9 +83,6 @@ stages:
             Write-Host "Setting short tag to '$shortTag'"
             Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
             Write-Host "##vso[task.setvariable variable=shortTag;isOutput=true]$shortTag"
-            Write-Host "targetBranch is $(targetBranch)"
-            Write-Host "branch is 'release/$(sitecoreVersion)'"
-            
             
 - stage: Build
   dependsOn: Versioning
