@@ -36,12 +36,6 @@ variables:
   azureSubscriptionEndpoint: AKSServiceConnections
   sourceBranch: $(Build.SourceBranchName)
   targetBranch: $(System.PullRequest.TargetBranch)
-  #${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-    #stability: ''
-    #namespace: 'tools'
-  #${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-    #stability: '-unstable'
-    #namespace: 'experimental'
 
 pool: $(POOLNAME_LTSC2022)
 
@@ -74,7 +68,6 @@ stages:
             }
             Write-Host "Setting stability to '$stability'"
             Write-Host "Setting namespace to '$namespace'"
-            Write-Host "##vso[task.setvariable variable=stability;isOutput=true]$stability"
             Write-Host "##vso[task.setvariable variable=namespace;isOutput=true]$namespace"
 
             [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$stability"
@@ -136,7 +129,6 @@ stages:
   dependsOn:
   - Versioning
   - Test
-  #condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Push
