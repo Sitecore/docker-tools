@@ -3,6 +3,7 @@ trigger:
     include:
     - main
     - dev
+    - 'release/*'
   paths:
     include:
     - 'image/*'
@@ -14,6 +15,7 @@ pr:
     include:
     - main
     - dev
+    - 'release/*'
   paths:
     include:
     - 'image/*'
@@ -32,12 +34,8 @@ variables:
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
-  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-    stability: ''
-    namespace: 'tools'
-  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-    stability: '-unstable'
-    namespace: 'experimental'
+  sourceBranch: $(Build.SourceBranchName)
+  targetBranch: $(System.PullRequest.TargetBranch)
 
 pool: $(POOLNAME_LTSC2022)
 
@@ -48,7 +46,7 @@ stages:
   jobs:
   - job: Tagging
     steps:
-    
+
     - task: PowerShell@2
       name: Tags
       displayName: Generate tags
@@ -57,12 +55,21 @@ stages:
         script: |
             Write-Host "Pulling base image $(baseImage)..."
             docker pull $(baseImage)
-
             [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
             Write-Host "Image OS version is '$osVersion'"
-
-            [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$(stability)"
-            [string] $shortTag = "$(sitecoreVersion)-$(osName)$(stability)"
+            
+            if("$(sourceBranch)" -eq 'main' -or "$(targetBranch)" -eq 'release/$(sitecoreVersion)'){
+                [string] $stability = ""
+                [string] $namespace = "tools"
+            }else{
+                [string] $stability = "-unstable"
+                [string] $namespace = "experimental"
+            }
+            Write-Host "Setting stability to '$stability'"
+            Write-Host "Setting namespace to '$namespace'"
+            Write-Host "##vso[task.setvariable variable=namespace;isOutput=true]$namespace"
+            [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$stability"
+            [string] $shortTag = "$(sitecoreVersion)-$(osName)$stability"
             Write-Host "Setting long tag to '$longTag'"
             Write-Host "Setting short tag to '$shortTag'"
             Write-Host "##vso[task.setvariable variable=longTag;isOutput=true]$longTag"
@@ -77,8 +84,9 @@ stages:
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
+      namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
-    
+
     - task: DockerCompose@0
       displayName: Building image
       inputs:
@@ -114,12 +122,11 @@ stages:
         testResultsFormat: "NUnit"
         testResultsFiles: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
         failTaskOnFailedTests: true
-        
+
 - stage: Push
   dependsOn:
   - Versioning
   - Test
-  condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Push
@@ -127,6 +134,7 @@ stages:
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
+      namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
     - task: DockerCompose@0
