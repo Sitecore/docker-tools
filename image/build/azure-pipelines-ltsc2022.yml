@@ -55,7 +55,6 @@ stages:
         script: |
             Write-Host "Pulling base image $(baseImage)..."
             docker pull $(baseImage)
-
             [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
             Write-Host "Image OS version is '$osVersion'"
             
@@ -69,7 +68,6 @@ stages:
             Write-Host "Setting stability to '$stability'"
             Write-Host "Setting namespace to '$namespace'"
             Write-Host "##vso[task.setvariable variable=namespace;isOutput=true]$namespace"
-
             [string] $longTag = "$(sitecoreVersion).$(revision).$(buildNumber)-$osVersion-$(osName)$stability"
             [string] $shortTag = "$(sitecoreVersion)-$(osName)$stability"
             Write-Host "Setting long tag to '$longTag'"
