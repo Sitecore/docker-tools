@@ -46,7 +46,7 @@ stages:
   jobs:
   - job: Tagging
     steps:
-    
+
     - task: PowerShell@2
       name: Tags
       displayName: Generate tags
@@ -86,7 +86,7 @@ stages:
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
-    
+
     - task: DockerCompose@0
       displayName: Building image
       inputs:
@@ -122,7 +122,7 @@ stages:
         testResultsFormat: "NUnit"
         testResultsFiles: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
         failTaskOnFailedTests: true
-        
+
 - stage: Push
   dependsOn:
   - Versioning
