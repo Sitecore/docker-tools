@@ -13,6 +13,8 @@ Set-StrictMode -Version Latest
     Ensures the returned string contains at least one of each of the allowed character types.
 .PARAMETER DisallowSpecial
     Prevent the special characters ~!@#$%^&*_-+=`|(){}[]:;<>.?/
+.PARAMETER DisallowDollar
+    Prevent just $ symbol
 .PARAMETER DisallowCaps
     Prevent capital letters from appearing in the generated sting.
 .PARAMETER DisallowLower
@@ -26,7 +28,7 @@ Set-StrictMode -Version Latest
 .EXAMPLE
     PS C:\> Get-SitecoreRandomString -Length 10
 .EXAMPLE
-    PS C:\> Get-SitecoreRandomString -Length 10 -EnforceComplexity -DisallowSpecial
+    PS C:\> Get-SitecoreRandomString -Length 10 -EnforceComplexity -DisallowDollar
 #>
 function Get-SitecoreRandomString
 {
@@ -54,7 +56,11 @@ function Get-SitecoreRandomString
 
         [Parameter(ParameterSetName = 'custom', Position = 5)]
         [switch]
-        $DisallowNumbers
+        $DisallowNumbers,
+
+        [Parameter(ParameterSetName = 'custom', Position = 6)]
+        [switch]
+        $DisallowDollar
     )
 
     $complexity = 0
@@ -65,6 +71,7 @@ function Get-SitecoreRandomString
         $DisallowLower = $false
         $DisallowNumbers = $false
         $DisallowSpecial = $false
+        $DisallowDollar = $false
     }
 
     if (!$DisallowCaps) {
@@ -83,7 +90,12 @@ function Get-SitecoreRandomString
     }
 
     if (!$DisallowSpecial) {
-        $charset += ('~','!','@','#','$','%','^','&','*','_','-','+','=','`','|','\','(',')','{','}','[',']',':',';','<','>','.','?','/')
+        if (!$DisallowDollar) {
+        	$charset += ('~','!','@','#','$','%','^','&','*','_','-','+','=','`','|','\','(',')','{','}','[',']',':',';','<','>','.','?','/')
+        else
+        {
+		$charset += ('~','!','@','#','%','^','&','*','_','-','+','=','`','|','\','(',')','{','}','[',']',':',';','<','>','.','?','/')
+        }
         $complexity = $complexity + 1
     }
 
