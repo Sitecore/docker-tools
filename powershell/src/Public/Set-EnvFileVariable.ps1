@@ -51,10 +51,6 @@ function Set-EnvFileVariable
     if (!(Test-Path $Path)) {
         throw "The environment file $Path does not exist"
     }
-
-    # Escape any '$' to prevent being used as a regex substitution
-    $Value = $Value.Replace('$', '$$')
-
     
     if ($AsLiteral){
           # Escape any ' to avoid terminating the value unexpectedly
@@ -65,6 +61,8 @@ function Set-EnvFileVariable
 
     $lines = @(Get-Content $Path -Encoding UTF8 | ForEach-Object {
         if ($_ -imatch "^$Variable=.*") {
+            # Escape any '$' to prevent being used as a regex substitution
+            $Value = $Value.Replace('$', '$$')
             $_ -ireplace "^$Variable=.*", "$Variable=$Value"
             $found = $true
         }
