@@ -39,7 +39,12 @@ function Get-EnvFileVariable {
     $variables = Get-EnvFileContent $Path
     try {
         if ($variables.ContainsKey($variable)) {
-            return $variables.Get_Item($variable)
+            $rawVariable = $variables.Get_Item($variable)            
+            if (IsLiteral -Value $rawVariable) {
+                #strip out the start/end single quotes if it's a literal value and un-escape.
+                return $rawVariable.Substring(1, $rawVariable.Length - 2).Replace("''", "'")
+            }            
+            return $rawVariable
         }
         else {
             throw "Unable to find value for $Variable in $Path"
@@ -48,4 +53,16 @@ function Get-EnvFileVariable {
     catch {
         throw "Unable to find value for $Variable in $Path"
     }
+}
+
+function IsLiteral {
+    param( 
+        [Parameter(Mandatory = $true)]
+        [string] 
+        $Value
+    )
+    if(!$Value.StartsWith("'")){ return $false }
+    #Is it a literal value? Test for an odd number of starting 's to avoid escaped values and ending with '
+    $nonQuoteIndex = [regex]::Match($Value, "[^']")
+    return ($nonQuoteIndex.Success -and $nonQuoteIndex.Index % 2 -eq 1 -and $Value.EndsWith("'"))
 }

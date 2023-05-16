@@ -118,6 +118,36 @@
             $envFile | Should -FileContentMatchExactly '^VAR2=two$'
         }
 
+        It 'sets variables with literal values when specified' {
+            Set-Content $envFile -Value @(
+                'VAR1=VAL1',
+                'VAR2=VAL2',
+                'VAR3=VAL3'
+            )
+            Set-EnvFileVariable -Path $envFile -Variable 'VAR2' -Value 'literal$tring' -AsLiteral
+            $envFile | Should -FileContentMatchExactly ([regex]::Escape('VAR2=''literal$tring'''))
+        }
+
+        It 'adds variable with literal values when specified' {
+            Set-Content $envFile -Value @(
+                'VAR1=VAL1',
+                'VAR2=VAL2',
+                'VAR3=VAL3'
+            )
+            Set-EnvFileVariable -Path $envFile -Variable 'VAR4' -Value 'literal$tring' -AsLiteral
+            $envFile | Should -FileContentMatchExactly  ([regex]::Escape('VAR4=''literal$tring'''))
+        }
+
+        It 'adds variable with literal values when specified' {
+            Set-Content $envFile -Value @(
+                'VAR1=VAL1',
+                'VAR2=VAL2',
+                'VAR3=VAL3'
+            )
+            Set-EnvFileVariable -Path $envFile -Variable 'VAR2' -Value "VAL2'Escaped" -AsLiteral
+            $envFile | Should -FileContentMatchExactly "VAR2='VAL2''Escaped'"
+        }
+
         It 'uses .\.env as default $Path' {
             Set-Content $envFile -Value "foo=bar"
 
