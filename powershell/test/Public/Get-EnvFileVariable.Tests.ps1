@@ -42,19 +42,19 @@
             { Get-EnvFileVariable -Path $envFile -Variable 'VAR' } | Should -Throw
         }
 
-        It 'reads variable correctly usiing default file path' {
+        It 'reads variable correctly using default file path' {
             $value = 'VAL2'
             $result = Get-EnvFileVariable -Variable 'VAR2'
             $result | Should -Be $value
         }
 
-        It 'reads variable correctly usiing relative file path' {
+        It 'reads variable correctly using relative file path' {
             $value = 'VAL2'
             $result = Get-EnvFileVariable -Path $envFile -Variable 'VAR2'
             $result | Should -Be $value
         }
 
-        It 'reads variable correctly usiing absolute file path' {
+        It 'reads variable correctly using absolute file path' {
             $value = 'VAL2'
             $result = Get-EnvFileVariable -Path "$TestDrive\$envFile" -Variable 'VAR2'
             $result | Should -Be $value
