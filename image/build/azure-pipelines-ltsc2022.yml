@@ -120,6 +120,7 @@ stages:
 - stage: Push
   dependsOn:
   - Versioning
+  - Test
 
   jobs:
   - job: Push
