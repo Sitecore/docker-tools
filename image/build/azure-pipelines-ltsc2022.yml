@@ -35,7 +35,6 @@ variables:
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
   sourceBranch: $(Build.SourceBranchName)
-  targetBranch: $(System.PullRequest.TargetBranch)
 
 pool: $(POOLNAME_LTSC2022)
 
