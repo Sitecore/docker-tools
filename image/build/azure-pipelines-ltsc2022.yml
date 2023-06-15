@@ -35,12 +35,6 @@ variables:
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
   sourceBranch: $(Build.SourceBranch)
-  ${{ if or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),eq(variables['Build.SourceBranch'], 'refs/heads/release/$(sitecoreVersion)') ) }}:
-    stability: ''
-    namespace: 'tools'
-  ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/main'),ne(variables['Build.SourceBranch'], 'refs/heads/release/$(sitecoreVersion)') ) }}:
-    stability: '-unstable'
-    namespace: 'experimental'
 
 pool: $(POOLNAME_LTSC2022)
 
@@ -64,6 +58,14 @@ stages:
             Write-Host "Image OS version is '$osVersion'"
             
             Write-Host "Setting sourceBranch to $(sourceBranch)"
+            if("$(sourceBranch)" -eq "refs/heads/main" -or "$(sourceBranch)" -eq "refs/heads/release/$(sitecoreVersion)"){
+                [string] $stability = ""
+                [string] $namespace = "tools"
+            }else{
+                [string] $stability = "-unstable"
+                [string] $namespace = "experimental"
+            }
+            
             Write-Host "Setting stability to '$stability'"
             Write-Host "Setting namespace to '$namespace'"
             Write-Host "##vso[task.setvariable variable=namespace;isOutput=true]$namespace"
