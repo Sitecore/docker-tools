@@ -35,6 +35,12 @@ variables:
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
   sourceBranch: $(Build.SourceBranchName)
+  ${{ if or(eq(variables['Build.SourceBranchName'], 'main'),eq(variables['Build.SourceBranchName'], 'release/$(sitecoreVersion)') ) }}:
+    stability: ''
+    namespace: 'tools'
+  ${{ if or(ne(variables['Build.SourceBranchName'], 'main'),ne(variables['Build.SourceBranchName'], 'release/$(sitecoreVersion)') ) }}:
+    stability: '-unstable'
+    namespace: 'experimental'
 
 pool: $(POOLNAME_LTSC2019)
 
@@ -57,8 +63,7 @@ stages:
             [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
             Write-Host "Image OS version is '$osVersion'"
             
-            [string] $stability = ""
-            [string] $namespace = "tools"
+            Write-Host "Setting sourceBranch to $(sourceBranch)"
             Write-Host "Setting stability to '$stability'"
             Write-Host "Setting namespace to '$namespace'"
             Write-Host "##vso[task.setvariable variable=namespace;isOutput=true]$namespace"
