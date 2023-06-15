@@ -38,7 +38,7 @@ variables:
   ${{ if or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),eq(variables['Build.SourceBranch'], 'refs/heads/release/$(sitecoreVersion)') ) }}:
     stability: ''
     namespace: 'tools'
-  ${{ if or(ne(variables['Build.SourceBranch'], 'refs/heads/main'),ne(variables['Build.SourceBranch'], 'refs/heads/release/$(sitecoreVersion)') ) }}:
+  ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/main'),ne(variables['Build.SourceBranch'], 'refs/heads/release/$(sitecoreVersion)') ) }}:
     stability: '-unstable'
     namespace: 'experimental'
 
