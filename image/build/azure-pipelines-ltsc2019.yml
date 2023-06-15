@@ -34,11 +34,11 @@ variables:
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
-  sourceBranch: $(Build.SourceBranchName)
-  ${{ if or(eq(variables['Build.SourceBranchName'], 'main'),eq(variables['Build.SourceBranchName'], 'release/$(sitecoreVersion)') ) }}:
+  sourceBranch: $(Build.SourceBranch)
+  ${{ if or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),eq(variables['Build.SourceBranch'], 'refs/heads/release/$(sitecoreVersion)') ) }}:
     stability: ''
     namespace: 'tools'
-  ${{ if or(ne(variables['Build.SourceBranchName'], 'main'),ne(variables['Build.SourceBranchName'], 'release/$(sitecoreVersion)') ) }}:
+  ${{ if or(ne(variables['Build.SourceBranch'], 'refs/heads/main'),ne(variables['Build.SourceBranch'], 'refs/heads/release/$(sitecoreVersion)') ) }}:
     stability: '-unstable'
     namespace: 'experimental'
 
