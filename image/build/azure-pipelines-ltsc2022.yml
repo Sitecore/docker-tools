@@ -34,8 +34,7 @@ variables:
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
   azureSubscriptionEndpoint: AKSServiceConnections
-  sourceBranch: $(Build.SourceBranchName)
-  targetBranch: $(System.PullRequest.TargetBranch)
+  sourceBranch: $(Build.SourceBranch)
 
 pool: $(POOLNAME_LTSC2022)
 
@@ -58,13 +57,15 @@ stages:
             [string] $osVersion = (docker image inspect $(baseImage) | ConvertFrom-Json).OsVersion
             Write-Host "Image OS version is '$osVersion'"
             
-            if("$(sourceBranch)" -eq 'main' -or "$(targetBranch)" -eq 'release/$(sitecoreVersion)'){
+            Write-Host "Setting sourceBranch to $(sourceBranch)"
+            if("$(sourceBranch)" -eq "refs/heads/main" -or "$(sourceBranch)" -eq "refs/heads/release/$(sitecoreVersion)"){
                 [string] $stability = ""
                 [string] $namespace = "tools"
             }else{
                 [string] $stability = "-unstable"
                 [string] $namespace = "experimental"
             }
+            
             Write-Host "Setting stability to '$stability'"
             Write-Host "Setting namespace to '$namespace'"
             Write-Host "##vso[task.setvariable variable=namespace;isOutput=true]$namespace"
