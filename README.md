@@ -37,7 +37,7 @@ environment:
 The PowerShell module can be installed and imported from the Sitecore PowerShell Gallery. 
 
 ```powershell
-Register-PSRepository -Name SitecoreGallery -SourceLocation https://sitecore.myget.org/F/sc-powershell/api/v2
+Register-PSRepository -Name SitecoreGallery -SourceLocation https://nuget.sitecore.com/resources/v2/
 Install-Module SitecoreDockerTools
 Import-Module SitecoreDockerTools
 
