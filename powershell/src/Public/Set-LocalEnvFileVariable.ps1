@@ -2,10 +2,10 @@ Set-StrictMode -Version Latest
 
 <#
 .SYNOPSIS
-    Sets a variable in a Docker environment (.env) file.
+    Sets a variable in a Docker environment (.env.local) file.
 .DESCRIPTION
-    Sets a variable in a Docker environment (.env) file.
-    Assumes .env file is in the current directory by default.
+    Sets a variable in a Docker environment (.env.local) file.
+    Assumes .env.local file is in the current directory by default.
 .PARAMETER Variable
     Specifies the variable name.
 .PARAMETER Value
@@ -13,21 +13,21 @@ Set-StrictMode -Version Latest
 .PARAMETER AsLiteral
     Specifies whether the Value should be written as a literal (i.e wrapped in single quotes)
 .PARAMETER Path
-    Specifies the Docker environment (.env) file path. Assumes .env file is in the current directory by default.
+    Specifies the Docker environment (.env.local) file path. Assumes .env.local file is in the current directory by default.
 .EXAMPLE
-    PS C:\> Set-EnvFileVariable -Variable VAR1 -Value "value one"
+    PS C:\> Set-LocalEnvFileVariable -Variable VAR1 -Value "value one"
 .EXAMPLE
     PS C:\> "value one" | Set-EnvFileVariable "VAR1"
 .EXAMPLE
-    PS C:\> Set-EnvFileVariable -Variable VAR1 -Value "value one" -Path .\src\.env
+    PS C:\> Set-LocalEnvFileVariable -Variable VAR1 -Value "value one" -Path .\src\.env.local
 .EXAMPLE
-    PS C:\> Set-EnvFileVariable -Variable VAR1 -Value "literal $tring" -AsLiteral
+    PS C:\> Set-LocalEnvFileVariable -Variable VAR1 -Value "literal $tring" -AsLiteral
 .INPUTS
     System.String. You can pipe in the Value parameter.
 .OUTPUTS
     None.
 #>
-function Set-EnvFileVariable
+function Set-LocalEnvFileVariable
 {
     Param (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -45,7 +45,7 @@ function Set-EnvFileVariable
         $AsLiteral = $false,
 
         [string]
-        $Path = ".\.env"
+        $Path = ".\.env.local"
     )
 
     if (!(Test-Path $Path)) {
