@@ -62,8 +62,7 @@ Describe 'Watch-Directory.ps1' {
         "$($dst)\file.txt" | Should -Exist
     }
 
-    # Note: current test isn't working correct, "dst" folder always contains "file.txt".
-    It 'deletes files' -Skip {
+    It 'deletes files' {
         $src = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
         $dst = New-Item -Path (Join-Path $TestDrive (Get-Random)) -ItemType 'Directory'
         New-Item -Path "$($src)\file.txt" -ItemType 'File'
