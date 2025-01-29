@@ -24,7 +24,7 @@ resources:
 - repo: self
 
 variables:
-  sitecoreVersion: 10.3
+  sitecoreVersion: 10.4
   revision: $[counter(format('sitecoreVersion{0}', variables['sitecoreVersion']), 0)]
   moduleVer: $(sitecoreVersion).$(revision)
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
