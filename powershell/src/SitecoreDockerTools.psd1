@@ -27,7 +27,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Get-SitecoreRandomString','Create-RSAKey','Create-SelfSignedCertificate','Create-SelfSignedCertificateWithSignature','Create-CertificateFile','Create-KeyFile','ConvertTo-CompressedBase64String','Get-SitecoreCertificateAsBase64String','Set-EnvFileVariable','Add-HostsEntry','Remove-HostsEntry','Write-SitecoreDockerWelcome','Get-EnvFileVariable')
+    FunctionsToExport = @('Get-SitecoreRandomString','Create-RSAKey','Create-SelfSignedCertificate','Create-SelfSignedCertificateWithSignature','Create-CertificateFile','Create-KeyFile','Create-PfxFile','Create-SqlServerCertificate','ConvertTo-CompressedBase64String','Get-SitecoreCertificateAsBase64String','Set-EnvFileVariable','Add-HostsEntry','Remove-HostsEntry','Write-SitecoreDockerWelcome','Get-EnvFileVariable','Import-LoadedCertificate','Import-CertificateForSigning','Load-Certificate')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @()
