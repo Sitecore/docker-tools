@@ -146,12 +146,20 @@ stages:
           
           Write-Host "PowerShell Core installation completed"
           
-          # Verify installation
-          if (Get-Command pwsh -ErrorAction SilentlyContinue) {
-              Write-Host "✅ PowerShell Core is now available"
-              pwsh -v
+          # Verify installation by checking the installation path
+          $pwshPath = "C:\Program Files\PowerShell\7\pwsh.exe"
+          if (Test-Path $pwshPath) {
+              Write-Host "✅ PowerShell Core is installed at: $pwshPath"
+              
+              # Test PowerShell Core version
+              $version = & $pwshPath -v
+              Write-Host "PowerShell Core version: $version"
+              
+              # Add to PATH for current session
+              $env:PATH = "$env:PATH;C:\Program Files\PowerShell\7"
+              Write-Host "Added PowerShell Core to PATH"
           } else {
-              Write-Host "❌ PowerShell Core installation failed"
+              Write-Host "❌ PowerShell Core installation failed - executable not found at $pwshPath"
               exit 1
           }
 
