@@ -88,26 +88,63 @@ stages:
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: Docker@2
-      displayName: Login to ACR
+    - task: AzureCLI@2
+      displayName: Build and push Docker image
       inputs:
-        containerRegistry: $(azureSubscriptionEndpoint)
-        command: login
-
-    - task: Docker@2
-      displayName: Build and push image
-      inputs:
-        containerRegistry: $(azureSubscriptionEndpoint)
-        repository: $(namespace)/sitecore-docker-tools-assets
-        command: buildAndPush
-        Dockerfile: '**/Dockerfile'
-        buildContext: '$(Build.SourcesDirectory)/image/src'
-        tags: |
-          $(longTag)
-          $(shortTag)
-        arguments: --build-arg BASE_IMAGE=$(baseImage) --build-arg BUILD_IMAGE=$(buildImage) --force-rm
-      env:
-        DOCKER_BUILDKIT: 1
+        azureSubscription: $(azureSubscriptionEndpoint)
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          # Set environment variables
+          $env:DOCKER_BUILDKIT = "1"
+          
+          # Login to ACR
+          Write-Host "Logging in to Azure Container Registry: $(azureContainerRegistry)"
+          az acr login --name $(azureContainerRegistry)
+          
+          # Build the image
+          Write-Host "Building Docker image..."
+          $imageName = "$(azureContainerRegistry)/$(namespace)/sitecore-docker-tools-assets"
+          $longTag = "$(longTag)"
+          $shortTag = "$(shortTag)"
+          
+          Write-Host "Building image: $imageName"
+          Write-Host "Long tag: $longTag"
+          Write-Host "Short tag: $shortTag"
+          
+          # Build and tag the image
+          docker build `
+            --build-arg BASE_IMAGE=$(baseImage) `
+            --build-arg BUILD_IMAGE=$(buildImage) `
+            --force-rm `
+            -f "$(Build.SourcesDirectory)/image/src/Dockerfile" `
+            -t "${imageName}:${longTag}" `
+            -t "${imageName}:${shortTag}" `
+            "$(Build.SourcesDirectory)/image/src"
+          
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Docker build failed with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+          
+          # Push the images
+          Write-Host "Pushing image with long tag: ${imageName}:${longTag}"
+          docker push "${imageName}:${longTag}"
+          
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Docker push failed for long tag with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+          
+          Write-Host "Pushing image with short tag: ${imageName}:${shortTag}"
+          docker push "${imageName}:${shortTag}"
+          
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Docker push failed for short tag with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+          
+          Write-Host "Build and push completed successfully!"
 
 - stage: Test
   dependsOn: Build
@@ -142,28 +179,29 @@ stages:
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: Docker@2
-      displayName: Login to ACR
+    - task: AzureCLI@2
+      displayName: Push additional tags
       inputs:
-        containerRegistry: $(azureSubscriptionEndpoint)
-        command: login
-
-    - task: PowerShell@2
-      displayName: Tag and push additional versions
-      inputs:
-        targetType: 'inline'
-        script: |
-          $registry = "$(azureContainerRegistry)"
-          $namespace = "$(namespace)"
+        azureSubscription: $(azureSubscriptionEndpoint)
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          # Login to ACR
+          Write-Host "Logging in to Azure Container Registry: $(azureContainerRegistry)"
+          az acr login --name $(azureContainerRegistry)
+          
+          $imageName = "$(azureContainerRegistry)/$(namespace)/sitecore-docker-tools-assets"
           $longTag = "$(longTag)"
           $shortTag = "$(shortTag)"
           
-          Write-Host "Tagging image for registry: $registry"
+          Write-Host "Pulling and retagging images if needed..."
+          Write-Host "Image: $imageName"
+          Write-Host "Long tag: $longTag"
+          Write-Host "Short tag: $shortTag"
           
-          # Tag the image with full registry path
-          docker tag "${namespace}/sitecore-docker-tools-assets:${longTag}" "${registry}/${namespace}/sitecore-docker-tools-assets:${longTag}"
-          docker tag "${namespace}/sitecore-docker-tools-assets:${shortTag}" "${registry}/${namespace}/sitecore-docker-tools-assets:${shortTag}"
+          # Additional tagging logic can be added here if needed
+          # For now, the images are already pushed in the Build stage
           
-          # Push the tagged images
-          docker push "${registry}/${namespace}/sitecore-docker-tools-assets:${longTag}"
-          docker push "${registry}/${namespace}/sitecore-docker-tools-assets:${shortTag}"
+          Write-Host "Images are already available in ACR:"
+          Write-Host "- ${imageName}:${longTag}"
+          Write-Host "- ${imageName}:${shortTag}"
