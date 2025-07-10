@@ -9,11 +9,6 @@ services:
       args:
         BASE_IMAGE: ${BASE_IMAGE}
         BUILD_IMAGE: ${BUILD_IMAGE}
-      # Use modern build options
-      target: ""
-    # Enable BuildKit for better performance
-    environment:
-      - DOCKER_BUILDKIT=1
     # Windows-specific configuration for ltsc2025
     deploy:
       resources:
