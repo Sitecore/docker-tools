@@ -25,28 +25,7 @@ COPY /entrypoints/ /tools/entrypoints/
 COPY /scripts/ /tools/scripts/
 COPY /dev-patches/ /tools/dev-patches/
 
-# Verify all files are copied correctly and set permissions
-RUN Write-Host 'Verifying build stage contents:'; `
-    Get-ChildItem -Path 'C:\\tools' -Recurse | ForEach-Object { Write-Host $_.FullName }; `
-    Write-Host 'Setting permissions...'; `
-    icacls 'C:\\tools' /grant 'Everyone:(OI)(CI)F' /T | Out-Null;
-
 FROM ${BASE_IMAGE}
 
-# Set PowerShell as the shell for the final stage
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-
-# Create tools directory in final image
-RUN New-Item -Path 'C:\\tools' -ItemType 'Directory' -Force | Out-Null
-
-# Copy tools from build stage (using specific approach for Windows)
+# Copy resulting tools
 COPY --from=build /tools/ /tools/
-
-# Verify copy was successful using PowerShell
-RUN if (Test-Path 'C:\\tools') { `
-        Write-Host 'Tools directory verified successfully'; `
-        Get-ChildItem -Path 'C:\\tools' -Recurse | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }; `
-    } else { `
-        Write-Host 'ERROR: Tools directory not found'; `
-        exit 1; `
-    }

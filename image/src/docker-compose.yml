@@ -9,8 +9,3 @@ services:
       args:
         BASE_IMAGE: ${BASE_IMAGE}
         BUILD_IMAGE: ${BUILD_IMAGE}
-    # Windows-specific configuration for ltsc2025
-    deploy:
-      resources:
-        limits:
-          memory: 4G
