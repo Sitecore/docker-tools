@@ -157,7 +157,11 @@ stages:
               
               # Add to PATH for current session
               $env:PATH = "$env:PATH;C:\Program Files\PowerShell\7"
-              Write-Host "Added PowerShell Core to PATH"
+              Write-Host "Added PowerShell Core to PATH for current session"
+              
+              # Set PATH for subsequent tasks in the pipeline
+              Write-Host "##vso[task.setvariable variable=PATH]$env:PATH"
+              Write-Host "Set PATH variable for subsequent pipeline tasks"
           } else {
               Write-Host "❌ PowerShell Core installation failed - executable not found at $pwshPath"
               exit 1
