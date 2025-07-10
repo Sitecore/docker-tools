@@ -131,7 +131,7 @@ stages:
       inputs:
         scriptFolder: "$(Build.SourcesDirectory)/image/test/*"
         resultsFile: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
-        usePSCore: False
+        usePSCore: True
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: "NUnit"
