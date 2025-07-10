@@ -33,7 +33,6 @@ variables:
   buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
-  # Use Docker Registry service connection instead of azurerm
   dockerRegistryServiceConnection: $(DOCKER_REGISTRY_SERVICE_CONNECTION)
   sourceBranch: $(Build.SourceBranch)
 
@@ -163,10 +162,10 @@ stages:
           $longTag = "$(longTag)"
           $shortTag = "$(shortTag)"
           
-          Write-Host "✅ Images have been pushed to ACR successfully!" -ForegroundColor Green
-          Write-Host "Images are available at:" -ForegroundColor Yellow
-          Write-Host "- ${imageName}:${longTag}" -ForegroundColor Cyan
-          Write-Host "- ${imageName}:${shortTag}" -ForegroundColor Cyan
+          Write-Host "Images have been pushed to ACR successfully!"
+          Write-Host "Images are available at:"
+          Write-Host "- ${imageName}:${longTag}"
+          Write-Host "- ${imageName}:${shortTag}"
           
-          Write-Host "You can verify the images in Azure Portal or using Azure CLI:" -ForegroundColor Yellow
-          Write-Host "az acr repository show-tags --name $registry --repository $(namespace)/sitecore-docker-tools-assets" -ForegroundColor Cyan 
+          Write-Host "You can verify the images in Azure Portal or using Azure CLI:"
+          Write-Host "az acr repository show-tags --name $registry --repository $(namespace)/sitecore-docker-tools-assets"
