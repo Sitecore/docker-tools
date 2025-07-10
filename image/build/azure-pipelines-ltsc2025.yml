@@ -88,7 +88,7 @@ stages:
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: DockerCompose@0
+    - task: DockerCompose@1
       displayName: Building image
       inputs:
         containerregistrytype: Azure Container Registry
@@ -138,7 +138,7 @@ stages:
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: DockerCompose@0
+    - task: DockerCompose@1
       displayName: Pushing image
       inputs:
         containerregistrytype: Azure Container Registry
