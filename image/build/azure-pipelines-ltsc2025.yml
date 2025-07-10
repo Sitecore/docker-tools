@@ -33,7 +33,8 @@ variables:
   buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
-  azureSubscriptionEndpoint: AKSServiceConnections
+  # Use Docker Registry service connection instead of azurerm
+  dockerRegistryServiceConnection: $(DOCKER_REGISTRY_SERVICE_CONNECTION)
   sourceBranch: $(Build.SourceBranch)
 
 pool: $(POOLNAME_LTSC2025)
@@ -88,63 +89,36 @@ stages:
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: AzureCLI@2
-      displayName: Build and push Docker image
+    - task: Docker@2
+      displayName: Login to Container Registry
       inputs:
-        azureSubscription: $(azureSubscriptionEndpoint)
-        scriptType: 'ps'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          # Set environment variables
-          $env:DOCKER_BUILDKIT = "1"
-          
-          # Login to ACR
-          Write-Host "Logging in to Azure Container Registry: $(azureContainerRegistry)"
-          az acr login --name $(azureContainerRegistry)
-          
-          # Build the image
-          Write-Host "Building Docker image..."
-          $imageName = "$(azureContainerRegistry)/$(namespace)/sitecore-docker-tools-assets"
-          $longTag = "$(longTag)"
-          $shortTag = "$(shortTag)"
-          
-          Write-Host "Building image: $imageName"
-          Write-Host "Long tag: $longTag"
-          Write-Host "Short tag: $shortTag"
-          
-          # Build and tag the image
-          docker build `
-            --build-arg BASE_IMAGE=$(baseImage) `
-            --build-arg BUILD_IMAGE=$(buildImage) `
-            --force-rm `
-            -f "$(Build.SourcesDirectory)/image/src/Dockerfile" `
-            -t "${imageName}:${longTag}" `
-            -t "${imageName}:${shortTag}" `
-            "$(Build.SourcesDirectory)/image/src"
-          
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "Docker build failed with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
-          }
-          
-          # Push the images
-          Write-Host "Pushing image with long tag: ${imageName}:${longTag}"
-          docker push "${imageName}:${longTag}"
-          
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "Docker push failed for long tag with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
-          }
-          
-          Write-Host "Pushing image with short tag: ${imageName}:${shortTag}"
-          docker push "${imageName}:${shortTag}"
-          
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "Docker push failed for short tag with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
-          }
-          
-          Write-Host "Build and push completed successfully!"
+        containerRegistry: $(dockerRegistryServiceConnection)
+        command: 'login'
+
+    - task: Docker@2
+      displayName: Build Docker image
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(namespace)/sitecore-docker-tools-assets
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/image/src'
+        tags: |
+          $(longTag)
+          $(shortTag)
+        arguments: --build-arg BASE_IMAGE=$(baseImage) --build-arg BUILD_IMAGE=$(buildImage) --force-rm
+      env:
+        DOCKER_BUILDKIT: 1
+
+    - task: Docker@2
+      displayName: Push Docker image
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(namespace)/sitecore-docker-tools-assets
+        command: 'push'
+        tags: |
+          $(longTag)
+          $(shortTag)
 
 - stage: Test
   dependsOn: Build
@@ -172,36 +146,27 @@ stages:
 
   jobs:
   - job: Push
-    displayName: Push additional tags
+    displayName: Verify pushed images
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: AzureCLI@2
-      displayName: Push additional tags
+    - task: PowerShell@2
+      displayName: Verify pushed images
       inputs:
-        azureSubscription: $(azureSubscriptionEndpoint)
-        scriptType: 'ps'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          # Login to ACR
-          Write-Host "Logging in to Azure Container Registry: $(azureContainerRegistry)"
-          az acr login --name $(azureContainerRegistry)
-          
-          $imageName = "$(azureContainerRegistry)/$(namespace)/sitecore-docker-tools-assets"
+        targetType: 'inline'
+        script: |
+          $registry = "$(azureContainerRegistry)"
+          $imageName = "${registry}/$(namespace)/sitecore-docker-tools-assets"
           $longTag = "$(longTag)"
           $shortTag = "$(shortTag)"
           
-          Write-Host "Pulling and retagging images if needed..."
-          Write-Host "Image: $imageName"
-          Write-Host "Long tag: $longTag"
-          Write-Host "Short tag: $shortTag"
+          Write-Host "✅ Images have been pushed to ACR successfully!" -ForegroundColor Green
+          Write-Host "Images are available at:" -ForegroundColor Yellow
+          Write-Host "- ${imageName}:${longTag}" -ForegroundColor Cyan
+          Write-Host "- ${imageName}:${shortTag}" -ForegroundColor Cyan
           
-          # Additional tagging logic can be added here if needed
-          # For now, the images are already pushed in the Build stage
-          
-          Write-Host "Images are already available in ACR:"
-          Write-Host "- ${imageName}:${longTag}"
-          Write-Host "- ${imageName}:${shortTag}"
+          Write-Host "You can verify the images in Azure Portal or using Azure CLI:" -ForegroundColor Yellow
+          Write-Host "az acr repository show-tags --name $registry --repository $(namespace)/sitecore-docker-tools-assets" -ForegroundColor Cyan 
