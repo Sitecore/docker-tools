@@ -88,22 +88,26 @@ stages:
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: DockerCompose@0
-      displayName: Building image
+    - task: Docker@2
+      displayName: Login to ACR
       inputs:
-        containerregistrytype: Azure Container Registry
-        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
-        azureContainerRegistry: $(azureContainerRegistry)
-        dockerComposeFile: '**/docker-compose.yml'
-        dockerComposeFileArgs: |
-          REGISTRY=$(azureContainerRegistry)/$(namespace)/
-          VERSION=$(longTag)
-          BASE_IMAGE=$(baseImage)
-          BUILD_IMAGE=$(buildImage)
-        action: Build services
-        additionalImageTags: '$(shortTag)'
-        arguments: '--force-rm'
-        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+        containerRegistry: $(azureSubscriptionEndpoint)
+        command: login
+
+    - task: Docker@2
+      displayName: Build and push image
+      inputs:
+        containerRegistry: $(azureSubscriptionEndpoint)
+        repository: $(namespace)/sitecore-docker-tools-assets
+        command: buildAndPush
+        Dockerfile: '**/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/image/src'
+        tags: |
+          $(longTag)
+          $(shortTag)
+        arguments: --build-arg BASE_IMAGE=$(baseImage) --build-arg BUILD_IMAGE=$(buildImage) --force-rm
+      env:
+        DOCKER_BUILDKIT: 1
 
 - stage: Test
   dependsOn: Build
@@ -131,25 +135,35 @@ stages:
 
   jobs:
   - job: Push
-    displayName: Push image
+    displayName: Push additional tags
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: DockerCompose@0
-      displayName: Pushing image
+    - task: Docker@2
+      displayName: Login to ACR
       inputs:
-        containerregistrytype: Azure Container Registry
-        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
-        azureContainerRegistry: $(azureContainerRegistry)
-        dockerComposeFile: '**/docker-compose.yml'
-        dockerComposeFileArgs: |
-          REGISTRY=$(azureContainerRegistry)/$(namespace)/
-          VERSION=$(longTag)
-          BASE_IMAGE=$(baseImage)
-          BUILD_IMAGE=$(buildImage)
-        action: Push services
-        additionalImageTags: '$(shortTag)'
-        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+        containerRegistry: $(azureSubscriptionEndpoint)
+        command: login
+
+    - task: PowerShell@2
+      displayName: Tag and push additional versions
+      inputs:
+        targetType: 'inline'
+        script: |
+          $registry = "$(azureContainerRegistry)"
+          $namespace = "$(namespace)"
+          $longTag = "$(longTag)"
+          $shortTag = "$(shortTag)"
+          
+          Write-Host "Tagging image for registry: $registry"
+          
+          # Tag the image with full registry path
+          docker tag "${namespace}/sitecore-docker-tools-assets:${longTag}" "${registry}/${namespace}/sitecore-docker-tools-assets:${longTag}"
+          docker tag "${namespace}/sitecore-docker-tools-assets:${shortTag}" "${registry}/${namespace}/sitecore-docker-tools-assets:${shortTag}"
+          
+          # Push the tagged images
+          docker push "${registry}/${namespace}/sitecore-docker-tools-assets:${longTag}"
+          docker push "${registry}/${namespace}/sitecore-docker-tools-assets:${shortTag}"
