@@ -126,6 +126,34 @@ stages:
   - job: Pester
     displayName: Run Pester tests
     steps:
+    
+    - task: PowerShell@2
+      displayName: 'Install PowerShell Core'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Installing PowerShell Core for Windows Server 2025..."
+          
+          # Download and install PowerShell Core
+          $pwshUrl = "https://github.com/PowerShell/PowerShell/releases/download/v7.4.6/PowerShell-7.4.6-win-x64.msi"
+          $pwshInstaller = "$env:TEMP\PowerShell-7.4.6-win-x64.msi"
+          
+          Write-Host "Downloading PowerShell Core..."
+          Invoke-WebRequest -Uri $pwshUrl -OutFile $pwshInstaller
+          
+          Write-Host "Installing PowerShell Core..."
+          Start-Process -FilePath "msiexec.exe" -ArgumentList "/i", $pwshInstaller, "/quiet", "/norestart" -Wait
+          
+          Write-Host "PowerShell Core installation completed"
+          
+          # Verify installation
+          if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+              Write-Host "✅ PowerShell Core is now available"
+              pwsh -v
+          } else {
+              Write-Host "❌ PowerShell Core installation failed"
+              exit 1
+          }
 
     - task: Pester@9
       inputs:
