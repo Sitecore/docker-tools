@@ -33,11 +33,20 @@ RUN Write-Host 'Verifying build stage contents:'; `
 
 FROM ${BASE_IMAGE}
 
+# Set PowerShell as the shell for the final stage
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
 # Create tools directory in final image
-RUN mkdir C:\\tools
+RUN New-Item -Path 'C:\\tools' -ItemType 'Directory' -Force | Out-Null
 
 # Copy tools from build stage (using specific approach for Windows)
 COPY --from=build /tools/ /tools/
 
-# Verify copy was successful
-RUN dir C:\\tools
+# Verify copy was successful using PowerShell
+RUN if (Test-Path 'C:\\tools') { `
+        Write-Host 'Tools directory verified successfully'; `
+        Get-ChildItem -Path 'C:\\tools' -Recurse | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }; `
+    } else { `
+        Write-Host 'ERROR: Tools directory not found'; `
+        exit 1; `
+    }
