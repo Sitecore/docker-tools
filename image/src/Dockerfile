@@ -9,7 +9,7 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 
 # Create working directories
 RUN New-Item -Path 'C:\\temp' -ItemType 'Directory' -Force | Out-Null; `
-    New-Item -Path 'C:\\tools' -ItemType 'Directory' -Force | Out-Null;`
+    New-Item -Path 'C:\\tools' -ItemType 'Directory' -Force | Out-Null; `
     New-Item -Path 'C:\\tools\\bin' -ItemType 'Directory' -Force | Out-Null;
 
 # Install NuGet
@@ -25,7 +25,19 @@ COPY /entrypoints/ /tools/entrypoints/
 COPY /scripts/ /tools/scripts/
 COPY /dev-patches/ /tools/dev-patches/
 
+# Verify all files are copied correctly and set permissions
+RUN Write-Host 'Verifying build stage contents:'; `
+    Get-ChildItem -Path 'C:\\tools' -Recurse | ForEach-Object { Write-Host $_.FullName }; `
+    Write-Host 'Setting permissions...'; `
+    icacls 'C:\\tools' /grant 'Everyone:(OI)(CI)F' /T | Out-Null;
+
 FROM ${BASE_IMAGE}
 
-# Copy resulting tools
+# Create tools directory in final image
+RUN mkdir C:\\tools
+
+# Copy tools from build stage (using specific approach for Windows)
 COPY --from=build /tools/ /tools/
+
+# Verify copy was successful
+RUN dir C:\\tools
