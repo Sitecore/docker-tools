@@ -33,7 +33,7 @@ variables:
   buildImage: mcr.microsoft.com/windows/servercore:$(osName)
   buildNumber: $(Build.BuildID)
   azureContainerRegistry: $(ACR_ContainerRegistry)
-  azureSubscriptionEndpoint: AKSServiceConnections
+  dockerRegistryServiceConnection: $(DOCKER_REGISTRY_SERVICE_CONNECTION)
   sourceBranch: $(Build.SourceBranch)
 
 pool: $(POOLNAME_LTSC2025)
@@ -88,22 +88,36 @@ stages:
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: DockerCompose@0
-      displayName: Building image
+    - task: Docker@2
+      displayName: Login to Container Registry
       inputs:
-        containerregistrytype: Azure Container Registry
-        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
-        azureContainerRegistry: $(azureContainerRegistry)
-        dockerComposeFile: '**/docker-compose.yml'
-        dockerComposeFileArgs: |
-          REGISTRY=$(azureContainerRegistry)/$(namespace)/
-          VERSION=$(longTag)
-          BASE_IMAGE=$(baseImage)
-          BUILD_IMAGE=$(buildImage)
-        action: Build services
-        additionalImageTags: '$(shortTag)'
-        arguments: '--force-rm'
-        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        command: 'login'
+
+    - task: Docker@2
+      displayName: Build Docker image (Windows - no BuildKit)
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(namespace)/sitecore-docker-tools-assets
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/image/src'
+        tags: |
+          $(longTag)
+          $(shortTag)
+        arguments: --build-arg BASE_IMAGE=$(baseImage) --build-arg BUILD_IMAGE=$(buildImage) --force-rm
+      env:
+        DOCKER_BUILDKIT: 0
+
+    - task: Docker@2
+      displayName: Push Docker image
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(namespace)/sitecore-docker-tools-assets
+        command: 'push'
+        tags: |
+          $(longTag)
+          $(shortTag)
 
 - stage: Test
   dependsOn: Build
@@ -112,12 +126,52 @@ stages:
   - job: Pester
     displayName: Run Pester tests
     steps:
+    
+    - task: PowerShell@2
+      displayName: 'Install PowerShell Core'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Installing PowerShell Core for Windows Server 2025..."
+          
+          # Download and install PowerShell Core
+          $pwshUrl = "https://github.com/PowerShell/PowerShell/releases/download/v7.4.6/PowerShell-7.4.6-win-x64.msi"
+          $pwshInstaller = "$env:TEMP\PowerShell-7.4.6-win-x64.msi"
+          
+          Write-Host "Downloading PowerShell Core..."
+          Invoke-WebRequest -Uri $pwshUrl -OutFile $pwshInstaller
+          
+          Write-Host "Installing PowerShell Core..."
+          Start-Process -FilePath "msiexec.exe" -ArgumentList "/i", $pwshInstaller, "/quiet", "/norestart" -Wait
+          
+          Write-Host "PowerShell Core installation completed"
+          
+          # Verify installation by checking the installation path
+          $pwshPath = "C:\Program Files\PowerShell\7\pwsh.exe"
+          if (Test-Path $pwshPath) {
+              Write-Host "✅ PowerShell Core is installed at: $pwshPath"
+              
+              # Test PowerShell Core version
+              $version = & $pwshPath -v
+              Write-Host "PowerShell Core version: $version"
+              
+              # Add to PATH for current session
+              $env:PATH = "$env:PATH;C:\Program Files\PowerShell\7"
+              Write-Host "Added PowerShell Core to PATH for current session"
+              
+              # Set PATH for subsequent tasks in the pipeline
+              Write-Host "##vso[task.setvariable variable=PATH]$env:PATH"
+              Write-Host "Set PATH variable for subsequent pipeline tasks"
+          } else {
+              Write-Host "❌ PowerShell Core installation failed - executable not found at $pwshPath"
+              exit 1
+          }
 
     - task: Pester@9
       inputs:
         scriptFolder: "$(Build.SourcesDirectory)/image/test/*"
         resultsFile: "$(Build.SourcesDirectory)/image/test/Test-Pester.XML"
-        usePSCore: False
+        usePSCore: True
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: "NUnit"
@@ -131,25 +185,27 @@ stages:
 
   jobs:
   - job: Push
-    displayName: Push image
+    displayName: Verify pushed images
     variables:
       longTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.longTag']]
       shortTag: $[stageDependencies.Versioning.Tagging.outputs['Tags.shortTag']]
       namespace: $[stageDependencies.Versioning.Tagging.outputs['Tags.namespace']]
     steps:
 
-    - task: DockerCompose@0
-      displayName: Pushing image
+    - task: PowerShell@2
+      displayName: Verify pushed images
       inputs:
-        containerregistrytype: Azure Container Registry
-        azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
-        azureContainerRegistry: $(azureContainerRegistry)
-        dockerComposeFile: '**/docker-compose.yml'
-        dockerComposeFileArgs: |
-          REGISTRY=$(azureContainerRegistry)/$(namespace)/
-          VERSION=$(longTag)
-          BASE_IMAGE=$(baseImage)
-          BUILD_IMAGE=$(buildImage)
-        action: Push services
-        additionalImageTags: '$(shortTag)'
-        currentWorkingDirectory: '$(Build.SourcesDirectory)/image/src'
+        targetType: 'inline'
+        script: |
+          $registry = "$(azureContainerRegistry)"
+          $imageName = "${registry}/$(namespace)/sitecore-docker-tools-assets"
+          $longTag = "$(longTag)"
+          $shortTag = "$(shortTag)"
+          
+          Write-Host "Images have been pushed to ACR successfully!"
+          Write-Host "Images are available at:"
+          Write-Host "- ${imageName}:${longTag}"
+          Write-Host "- ${imageName}:${shortTag}"
+          
+          Write-Host "You can verify the images in Azure Portal or using Azure CLI:"
+          Write-Host "az acr repository show-tags --name $registry --repository $(namespace)/sitecore-docker-tools-assets"

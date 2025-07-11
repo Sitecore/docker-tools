@@ -9,7 +9,7 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 
 # Create working directories
 RUN New-Item -Path 'C:\\temp' -ItemType 'Directory' -Force | Out-Null; `
-    New-Item -Path 'C:\\tools' -ItemType 'Directory' -Force | Out-Null;`
+    New-Item -Path 'C:\\tools' -ItemType 'Directory' -Force | Out-Null; `
     New-Item -Path 'C:\\tools\\bin' -ItemType 'Directory' -Force | Out-Null;
 
 # Install NuGet
