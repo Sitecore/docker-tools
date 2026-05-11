@@ -59,5 +59,46 @@
                 $certificate.Issuer | Should -Be $signerCert.Subject
             }
         }
+                
+        Context 'When creating a self-signed certificate with DEFAULT validity period' {
+            It 'creates a certificate with the correct start and end dates' {
+                # Arrange
+                $commonName = 'test.sql.server'
+                $dnsName = 'test.sql.server'
+
+                # Act
+                $certificate = Create-SqlServerCertificate -CommonName $commonName -DnsName $dnsName -SignerCertificate $signerCert
+
+                # Assert
+                $certificate | Should -Not -BeNullOrEmpty
+                
+                # Check default validity period
+                $now = [System.DateTimeOffset]::Now
+                
+                $certificate.NotBefore | Should -BeGreaterThan ($now.DateTime.AddSeconds(-5))
+                $certificate.NotBefore | Should -BeLessThan ($now.DateTime.AddSeconds(5))
+                
+                $certificate.NotAfter | Should -BeGreaterThan ($now.AddDays(3285).DateTime.AddSeconds(-5))
+                $certificate.NotAfter | Should -BeLessThan ($now.AddDays(3285).DateTime.AddSeconds(5))
+            }
+        }
+
+        Context 'When creating a self-signed certificate with CUSTOM validity period' {
+            It 'creates a certificate with the correct start and end dates' {
+                # Arrange
+                $commonName = 'test.sql.server'
+                $dnsName = 'test.sql.server'
+                $notBefore = [System.DateTimeOffset]::UtcNow.AddDays(-1)
+                $notAfter = [System.DateTimeOffset]::UtcNow.AddDays(365)
+
+                # Act
+                $certificate = Create-SqlServerCertificate -CommonName $commonName -DnsName $dnsName -SignerCertificate $signerCert -NotBefore $notBefore -NotAfter $notAfter
+
+                # Assert
+                $certificate | Should -Not -BeNullOrEmpty
+                $certificate.NotBefore | Should -BeGreaterThan ($notBefore.DateTime.AddSeconds(-1))
+                $certificate.NotAfter | Should -BeLessThan ($notAfter.DateTime.AddSeconds(1))
+            }
+        }
     }
 }

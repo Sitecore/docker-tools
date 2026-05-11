@@ -41,11 +41,11 @@ function Create-SqlServerCertificate{
 
         [Parameter()]
         [System.DateTimeOffset]
-        $NotBefore = [System.DateTimeOffset]::UtcNow,
+        $NotBefore = [System.DateTimeOffset]::Now,
 
         [Parameter()]
         [System.DateTimeOffset]
-        $NotAfter = [System.DateTimeOffset]::UtcNow.AddDays(3285)
+        $NotAfter = [System.DateTimeOffset]::Now.AddDays(3285)
     )
 
     Write-Information -MessageData "Creating a certificate for SqlServer with '$($SignerCertificate.Thumbprint)' signer." -InformationAction Continue
